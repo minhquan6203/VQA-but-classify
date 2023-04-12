@@ -1,0 +1,35 @@
+stages:
+  process_daquar_dataset:
+    cmd: python src/process_dataset.py --config=params.yaml
+    deps:
+    - src/process_dataset.py
+    - dataset/all_qa_pairs.txt
+    params:
+    - data
+    outs:
+    - dataset/data_train.csv:
+        cache: false
+    - dataset/data_eval.csv:
+        cache: false
+    - dataset/answer_space.txt:
+        cache: false
+  
+  train:
+    cmd: python src/main.py --config=params.yaml
+    deps:
+    - dataset/data_train.csv
+    - dataset/data_eval.csv
+    - dataset/answer_space.txt
+    - src/main.py
+    params:
+    - base
+    - data
+    - tokenizer
+    - model
+    - train
+    - metrics
+    metrics:
+    - metrics/metrics.json:
+        cache: false
+        
+    
