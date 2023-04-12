@@ -33,6 +33,15 @@ def preprocess(json_file,folder_output):
             f.write('đéo biết')
           f.write('\n')
 
+    with open(f'{path}/all_qa_pairs.txt', 'w',encoding='utf-8') as f:
+        for i in range(len(df_qa['answer'])):
+          f.write(df_qa['question'][i])
+          f.write('\n')
+          if len(df_qa['answer'][i]) !=0:
+              f.write(df_qa['answer'][i])
+          else:
+            f.write('đéo biết')
+          f.write('\n')
     #split file for train and val
     df = pd.read_csv(f'{path}/data1.csv')
     rng = RandomState()

@@ -18,7 +18,7 @@ def loadDaquarDataset(config: Dict) -> Dict:
     dataset = dataset.map(
         lambda examples: {
             'label': [
-                answer_space.index(ans.replace(" ", "").split(",")[0]) # Select the 1st answer if multiple answers are provided
+                answer_space.index(ans.split("\n")[0]) # Select the 1st answer if multiple answers are provided
                 for ans in examples[config["data"]["answer_col"]]
             ]
         },

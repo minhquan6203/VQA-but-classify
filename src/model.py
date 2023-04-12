@@ -11,7 +11,7 @@ class MultimodalVQAModel(nn.Module):
             intermediate_dims: int,
             dropout: float,
             pretrained_text_name: str,
-            pretrained_image_name: str):
+            pretrained_image_name: str ):
      
         super(MultimodalVQAModel, self).__init__()
         self.num_labels = num_labels
@@ -27,13 +27,50 @@ class MultimodalVQAModel(nn.Module):
         self.fusion = nn.Sequential(
             nn.Linear(self.text_encoder.config.hidden_size + self.image_encoder.config.hidden_size, intermediate_dims),
             nn.ReLU(),
-            nn.Dropout(dropout),
+            nn.Dropout(0.5),
         )
-
         
-        self.classifier = nn.LogSoftmax(intermediate_dims, self.num_labels)
+        self.classifier = nn.Linear(intermediate_dims, self.num_labels)
         
         self.criterion = nn.CrossEntropyLoss()
+    
+    def forward(
+            self,
+            input_ids: torch.LongTensor,
+            pixel_values: torch.FloatTensor,
+            attention_mask: Optional[torch.LongTensor] = None,
+            token_type_ids: Optional[torch.LongTensor] = None,
+            labels: Optional[torch.LongTensor] = None):
+        
+        encoded_text = self.text_encoder(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            token_type_ids=token_type_ids,
+            return_dict=True,
+        )
+        encoded_image = self.image_encoder(
+            pixel_values=pixel_values,
+            return_dict=True,
+        )
+        fused_output = self.fusion(
+            torch.cat(
+                [
+                    encoded_text['pooler_output'],
+                    encoded_image['pooler_output'],
+                ],
+                dim=1
+            )
+        )
+        logits = self.classifier(fused_output)
+        
+        out = {
+            "logits": logits
+        }
+        if labels is not None:
+            loss = self.criterion(logits, labels)
+            out["loss"] = loss
+        
+        return out
     
     def forward(
             self,
