@@ -22,7 +22,7 @@ tokenizer:
 model:
   name: bert-beit  # Custom name for the multimodal model
   text_encoder: bert-base-multilingual-uncased # Valid transformer model for text encoding from HuggingFace
-  image_encoder: microsoft/beit-base-patch16-224-pt22k-ft22k  # Valid transformer model for image encoding from HuggingFace
+  image_encoder: google/vit-base-patch16-224-in21k  # Valid transformer model for image encoding from HuggingFace
   intermediate_dims: 512
   dropout: 0.3
 

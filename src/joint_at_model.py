@@ -3,7 +3,7 @@ import torch
 from torch import nn
 from transformers import AutoModel
 
-#model này lấy ý tưởng từ mcan
+
 class MultimodalVQAModel(nn.Module):
     def __init__(
             self,
@@ -53,31 +53,12 @@ class MultimodalVQAModel(nn.Module):
             pixel_values=pixel_values,
             return_dict=True,
         )
-
-        # Text attention
-        text_hidden_states = encoded_text['last_hidden_state']
-        text_att = self.text_attention(text_hidden_states)
-        text_att = torch.tanh(text_att)
-        text_att = self.attention_weights(text_att)
-        text_att = torch.softmax(text_att, dim=1)
-        text_weighted = torch.bmm(text_att.transpose(1, 2), text_hidden_states)
-
-        # Image attention
-        image_hidden_states = encoded_image['last_hidden_state']
-        image_att = self.image_attention(image_hidden_states)
-        image_att = torch.tanh(image_att)
-        image_att = self.attention_weights(image_att)
-        image_att = torch.softmax(image_att, dim=1)
-        image_weighted = torch.bmm(image_att.transpose(1, 2), image_hidden_states)
-
-        # Co-attention
-        attention_weights = torch.bmm(text_weighted, image_weighted.transpose(1, 2))
-        attention_weights = torch.softmax(attention_weights, dim=2)
-        attended_text = torch.bmm(attention_weights, image_weighted)
-        attended_image = torch.bmm(attention_weights.transpose(1, 2), text_weighted)
-
-        # Fusion and classification
-        fused_output = self.fusion(torch.cat([attended_text.squeeze(), attended_image.squeeze()], dim=1))
+        text_attended = self.attention_weights(torch.tanh(self.text_attention(encoded_text['last_hidden_state'])))
+        image_attended = self.attention_weights(torch.tanh(self.image_attention(encoded_image['last_hidden_state'])))
+        attention_weights = torch.softmax(torch.cat([text_attended, image_attended], dim=1), dim=1)
+        attended_text = torch.sum(attention_weights[:, 0].unsqueeze(-1) * encoded_text['last_hidden_state'], dim=1)
+        attended_image = torch.sum(attention_weights[:, 1].unsqueeze(-1) * encoded_image['last_hidden_state'], dim=1)
+        fused_output = self.fusion(torch.cat([attended_text, attended_image], dim=1))
         logits = self.classifier(fused_output)
 
         out = {
