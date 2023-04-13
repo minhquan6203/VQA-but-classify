@@ -27,7 +27,7 @@ class MultimodalVQAModel(nn.Module):
         self.fusion = nn.Sequential(
             nn.Linear(self.text_encoder.config.hidden_size + self.image_encoder.config.hidden_size, intermediate_dims),
             nn.ReLU(),
-            nn.Dropout(0.5),
+            nn.Dropout(dropout),
         )
         
         self.classifier = nn.Linear(intermediate_dims, self.num_labels)
