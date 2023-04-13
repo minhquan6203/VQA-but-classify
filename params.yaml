@@ -2,11 +2,11 @@ base:
   use_cuda: True
 
 data:
-  dataset_folder: dataset
-  images_folder: images
+  dataset_folder: data
+  images_folder: book_cover_img
   all_qa_pairs_file: all_qa_pairs.txt
-  train_dataset: data_train.csv
-  eval_dataset: data_eval.csv
+  train_dataset: train.csv
+  eval_dataset: val.csv
   question_col: question
   image_col: image_id
   answer_col: answer
@@ -14,17 +14,17 @@ data:
 
 tokenizer:
   padding: longest
-  max_length: 24
+  max_length: 64
   truncation: True
   return_token_type_ids: True
   return_attention_mask: True
 
 model:
-  name: roberta-beit  # Custom name for the multimodal model
-  text_encoder: roberta-base # Valid transformer model for text encoding from HuggingFace
+  name: bert-beit  # Custom name for the multimodal model
+  text_encoder: bert-base-multilingual-uncased # Valid transformer model for text encoding from HuggingFace
   image_encoder: microsoft/beit-base-patch16-224-pt22k-ft22k  # Valid transformer model for image encoding from HuggingFace
   intermediate_dims: 512
-  dropout: 0.5
+  dropout: 0.3
 
 train:
   output_dir: checkpoint
@@ -42,10 +42,10 @@ train:
   save_steps: 100
   save_total_limit: 3            # Save only the last 3 checkpoints at any given time while training 
   metric_for_best_model: wups
-  per_device_train_batch_size: 32
-  per_device_eval_batch_size: 32
+  per_device_train_batch_size: 16
+  per_device_eval_batch_size: 16
   remove_unused_columns: False
-  dataloader_num_workers: 8
+  dataloader_num_workers: 2
   load_best_model_at_end: True
 
 metrics:
