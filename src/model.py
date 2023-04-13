@@ -4,6 +4,18 @@ from torch import nn
 from transformers import AutoModel
 
 
+from typing import List, Dict, Optional
+import torch
+from torch import nn
+from transformers import AutoModel
+
+
+from typing import List, Dict, Optional
+import torch
+from torch import nn
+from transformers import AutoModel
+
+
 class MultimodalVQAModel(nn.Module):
     def __init__(
             self,
@@ -25,11 +37,10 @@ class MultimodalVQAModel(nn.Module):
             self.pretrained_image_name,
         )
         self.fusion = nn.Sequential(
-            nn.Linear(self.text_encoder.config.hidden_size + self.image_encoder.config.hidden_size, intermediate_dims),
+            nn.Linear(self.text_encoder.config.hidden_size + 512, intermediate_dims),
             nn.ReLU(),
             nn.Dropout(dropout),
         )
-        self.attention = nn.Linear(intermediate_dims, 1)
         
         self.classifier = nn.Linear(intermediate_dims, self.num_labels)
         
@@ -53,20 +64,19 @@ class MultimodalVQAModel(nn.Module):
             pixel_values=pixel_values,
             return_dict=True,
         )
+        image_features = encoded_image['last_hidden_state']
+        image_features = image_features.mean(dim=1)  # mean pool image features over spatial dimension
+        image_features = nn.Linear(image_features.shape[-1], 512)(image_features)  # map image features to expected size
         fused_output = self.fusion(
             torch.cat(
                 [
                     encoded_text['pooler_output'],
-                    encoded_image['pooler_output'],
+                    image_features,
                 ],
                 dim=1
             )
         )
-        attention_weights = self.attention(fused_output).squeeze(-1)
-        alpha = torch.softmax(attention_weights, dim=-1).unsqueeze(-1)
-        attended_image = (encoded_image.last_hidden_state * alpha).sum(dim=1)
-        combined_output = torch.cat([encoded_text.last_hidden_state[:, 0, :], attended_image], dim=-1)
-        logits = self.classifier(combined_output)
+        logits = self.classifier(fused_output)
 
         out = {
             "logits": logits
@@ -77,6 +87,8 @@ class MultimodalVQAModel(nn.Module):
             out["loss"] = loss
         
         return out
+
+
 
 
 def createMultimodalModelForVQA(config: Dict, answer_space: List[str]) -> MultimodalVQAModel:
