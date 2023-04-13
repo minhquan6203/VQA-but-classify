@@ -3,6 +3,7 @@ import pandas as pd
 import pathlib
 from numpy.random import RandomState
 import os
+from PIL import Image
 
 def preprocess(json_file,folder_output):
     os.makedirs(folder_output, exist_ok=True)
@@ -42,17 +43,35 @@ def preprocess(json_file,folder_output):
           else:
             f.write('đéo biết')
           f.write('\n')
-    #split file for train and val
+
+    #split file for train, validation and test
     df = pd.read_csv(f'{path}/data1.csv')
     rng = RandomState()
-    train = df.sample(frac=0.8, random_state=rng)
-    val = df.loc[~df.index.isin(train.index)]
+    train_val = df.sample(frac=0.8, random_state=rng)
+    test = df.loc[~df.index.isin(train_val.index)]
+    train = train_val.sample(frac=0.8889, random_state=rng)
+    val = train_val.loc[~train_val.index.isin(train.index)]
+
     train.to_csv(f'{path}/train.csv',index=False)
     val.to_csv(f'{path}/val.csv',index=False)
+    test.to_csv(f'{path}/test.csv',index=False)
 
+def resize_images(input_folder, output_folder, size):
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    for filename in os.listdir(input_folder):
+        if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+            with Image.open(os.path.join(input_folder, filename)) as im:
+                if im.mode != "RGB":
+                    im = im.convert("RGB")
+                im_resized = im.resize(size)
+                output_filename = os.path.join(output_folder, filename)
+                im_resized.save(output_filename)
 
 
 if __name__ == '__main__':
     json_file = '/content/drive/MyDrive/vivqa_on_book/new_b_all_label.json'
     folder_output = 'data'
     preprocess(json_file, folder_output)
+    resize_images('book_cover_img','./data/book_cover_img',(512,512))
