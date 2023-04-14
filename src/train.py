@@ -26,7 +26,6 @@ def trainMultimodalModelForVQA(config, device, dataset, collator, model, compute
     training_args, early_stopping_callback = setTrainingArgs(config, device)
     training_args.output_dir = os.path.join(training_args.output_dir, config["model"]["name"])
     optimizer = torch.optim.AdamW(model.parameters(), lr=training_args.learning_rate)
-    scaler = torch.cuda.amp.GradScaler(enabled=training_args.fp16)
     scheduler = get_scheduler(
         training_args.lr_scheduler_type,
         optimizer,

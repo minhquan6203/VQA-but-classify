@@ -40,11 +40,8 @@ train:
   warmup_ratio: 0.0
   warmup_steps: 0
   evaluation_strategy: epoch
-  eval_steps: 1
   logging_strategy: epoch
-  logging_steps: 1
   save_strategy: epoch
-  save_steps: None  # save after each epoch
   save_total_limit: 2 
   metric_for_best_model: accuracy
   per_device_train_batch_size: 64
