@@ -2,6 +2,9 @@ import os
 import shutil
 from typing import Dict
 from transformers import TrainingArguments, Trainer, EarlyStoppingCallback, logging
+import torch
+from transformers.optimization import get_scheduler
+
 
 def setTrainingArgs(config: Dict, device) -> TrainingArguments:
     training_args = config["train"]
@@ -12,26 +15,46 @@ def setTrainingArgs(config: Dict, device) -> TrainingArguments:
     training_args["load_best_model_at_end"] = True
     training_args["metric_for_best_model"] = "eval_accuracy"
     training_args["greater_is_better"] = False
-    early_stopping_callback = EarlyStoppingCallback(early_stopping_patience=training_args["early_stopping_patience"],
-                                                     early_stopping_threshold=training_args["early_stopping_threshold"])
+    early_stopping_patience = config["early_stoping"]["early_stopping_patience"]
+    early_stopping_threshold = config["early_stoping"]["early_stopping_threshold"]
+    early_stopping_callback = EarlyStoppingCallback(early_stopping_patience, early_stopping_threshold)
 
     return TrainingArguments(**training_args), early_stopping_callback
+
 
 def trainMultimodalModelForVQA(config, device, dataset, collator, model, compute_metrics):
     training_args, early_stopping_callback = setTrainingArgs(config, device)
     training_args.output_dir = os.path.join(training_args.output_dir, config["model"]["name"])
-    ckpt=sorted(os.listdir(training_args.output_dir))
+    optimizer = torch.optim.AdamW(model.parameters(), lr=training_args.learning_rate)
+    scaler = torch.cuda.amp.GradScaler(enabled=training_args.fp16)
+    scheduler = get_scheduler(
+        training_args.lr_scheduler_type,
+        optimizer,
+        num_warmup_steps=training_args.warmup_steps,
+        num_training_steps=training_args.num_train_epochs * len(dataset['train'])
+    )
+
     # Load last saved model if exists
     if os.path.exists(training_args.output_dir):
-        model_checkpoint = os.path.join(training_args.output_dir, ckpt[-1])
-        if os.path.isfile(model_checkpoint):
-            model = model.from_pretrained(model_checkpoint)
+        checkpoint_folder=max(os.listdir(training_args.output_dir), key=lambda x: int(x.split('-')[1]))
+        model_checkpoint = os.path.join(training_args.output_dir, checkpoint_folder)
+        if os.path.isdir(model_checkpoint):
+            model.load_state_dict(torch.load(os.path.join(model_checkpoint, "pytorch_model.bin")))
+            optimizer.load_state_dict(torch.load(os.path.join(model_checkpoint, "optimizer.pt")))
 
+            print(f"Continue training at {checkpoint_folder}")
+        else:
+            print("đéo ổn rồi")
+    else:
+        print("lần đầu làm chuyện ấy")
+
+    optimizers = (optimizer, scheduler)
     multi_trainer = Trainer(
         model,
         training_args,
         train_dataset=dataset['train'],
         eval_dataset=dataset['val'],
+        optimizers=optimizers,
         data_collator=collator,
         compute_metrics=compute_metrics,
         callbacks=[early_stopping_callback]
