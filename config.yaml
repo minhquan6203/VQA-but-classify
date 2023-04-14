@@ -29,7 +29,6 @@ model:
 
 early_stoping:
   early_stopping_patience: 5
-  early_stopping_threshold: None
 
 train:
   output_dir: checkpoint

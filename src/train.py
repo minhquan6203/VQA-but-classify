@@ -14,10 +14,9 @@ def setTrainingArgs(config: Dict, device) -> TrainingArguments:
     # Add early stopping callback
     training_args["load_best_model_at_end"] = True
     training_args["metric_for_best_model"] = "eval_accuracy"
-    training_args["greater_is_better"] = False
+    training_args["greater_is_better"] = True
     early_stopping_patience = config["early_stoping"]["early_stopping_patience"]
-    early_stopping_threshold = config["early_stoping"]["early_stopping_threshold"]
-    early_stopping_callback = EarlyStoppingCallback(early_stopping_patience, early_stopping_threshold)
+    early_stopping_callback = EarlyStoppingCallback(early_stopping_patience)
 
     return TrainingArguments(**training_args), early_stopping_callback
 
@@ -38,12 +37,9 @@ def trainMultimodalModelForVQA(config, device, dataset, collator, model, compute
         checkpoint_folder=max(os.listdir(training_args.output_dir), key=lambda x: int(x.split('-')[1]))
         model_checkpoint = os.path.join(training_args.output_dir, checkpoint_folder)
         if os.path.isdir(model_checkpoint):
-            model.load_state_dict(torch.load(os.path.join(model_checkpoint, "pytorch_model.bin")))
-            optimizer.load_state_dict(torch.load(os.path.join(model_checkpoint, "optimizer.pt")))
-
             print(f"Continue training at {checkpoint_folder}")
         else:
-            print("đéo ổn rồi")
+            model_checkpoint=None
     else:
         print("lần đầu làm chuyện ấy")
 
@@ -56,10 +52,10 @@ def trainMultimodalModelForVQA(config, device, dataset, collator, model, compute
         optimizers=optimizers,
         data_collator=collator,
         compute_metrics=compute_metrics,
-        callbacks=[early_stopping_callback]
+        callbacks=[early_stopping_callback],
     )
 
-    train_multi_metrics = multi_trainer.train()
+    train_multi_metrics = multi_trainer.train(resume_from_checkpoint=model_checkpoint)
     eval_multi_metrics = multi_trainer.evaluate()
 
     return train_multi_metrics, eval_multi_metrics
