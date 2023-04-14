@@ -6,7 +6,8 @@ data:
   images_folder: book_cover_img
   all_qa_pairs_file: all_qa_pairs.txt
   train_dataset: train.csv
-  eval_dataset: val.csv
+  val_dataset: val.csv
+  test_dataset: tes.csv
   question_col: question
   image_col: image_id
   answer_col: answer
@@ -20,7 +21,7 @@ tokenizer:
   return_attention_mask: True
 
 model:
-  name: bert-beit  # Custom name for the multimodal model
+  name: mbert-vit  # Custom name for the multimodal model
   text_encoder: bert-base-multilingual-uncased # Valid transformer model for text encoding from HuggingFace
   image_encoder: google/vit-base-patch16-224-in21k  # Valid transformer model for image encoding from HuggingFace
   intermediate_dims: 512
@@ -28,22 +29,24 @@ model:
 
 train:
   output_dir: checkpoint
+  early_stopping_patience: 5
+  early_stopping_threshold: 0.0
   seed: 12345
-  num_train_epochs: 5
+  num_train_epochs: 100
   learning_rate: 5.0e-5
   weight_decay: 0.0
   warmup_ratio: 0.0
   warmup_steps: 0
-  evaluation_strategy: steps
-  eval_steps: 100
-  logging_strategy: steps
-  logging_steps: 100
-  save_strategy: steps
-  save_steps: 100
-  save_total_limit: 3            # Save only the last 3 checkpoints at any given time while training 
-  metric_for_best_model: wups
-  per_device_train_batch_size: 16
-  per_device_eval_batch_size: 16
+  evaluation_strategy: epoch
+  eval_steps: 1
+  logging_strategy: epoch
+  logging_steps: 1
+  save_strategy: epoch
+  save_steps: 1
+  save_total_limit: 3   
+  metric_for_best_model: accuracy
+  per_device_train_batch_size: 64
+  per_device_eval_batch_size: 64
   remove_unused_columns: False
   dataloader_num_workers: 2
   load_best_model_at_end: True
@@ -53,4 +56,4 @@ metrics:
   metrics_file: metrics.json
 
 inference:
-  checkpoint: checkpoint-1500
+  checkpoint: checkpoint-3

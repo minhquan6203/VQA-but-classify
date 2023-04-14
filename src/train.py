@@ -10,7 +10,7 @@ def setTrainingArgs(config: Dict, device) -> TrainingArguments:
 
     # Add early stopping callback
     training_args["load_best_model_at_end"] = True
-    training_args["metric_for_best_model"] = "eval_loss"
+    training_args["metric_for_best_model"] = "eval_accuracy"
     training_args["greater_is_better"] = False
     early_stopping_callback = EarlyStoppingCallback(early_stopping_patience=training_args["early_stopping_patience"],
                                                      early_stopping_threshold=training_args["early_stopping_threshold"])
@@ -31,7 +31,7 @@ def trainMultimodalModelForVQA(config, device, dataset, collator, model, compute
         model,
         training_args,
         train_dataset=dataset['train'],
-        eval_dataset=dataset['test'],
+        eval_dataset=dataset['val'],
         data_collator=collator,
         compute_metrics=compute_metrics,
         callbacks=[early_stopping_callback]

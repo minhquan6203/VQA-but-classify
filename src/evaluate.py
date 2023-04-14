@@ -66,8 +66,7 @@ class WuPalmerScoreCalculator:
 
         final_score=global_max*weight_a*weight_b*interp_weight*global_weight
         return final_score
-
-
+    
     def batch_wup_measure(self, labels: np.ndarray, preds: np.ndarray) -> float:
         wup_scores = [self.wup_measure(self.answer_space[label], self.answer_space[pred]) for label, pred in zip(labels, preds)]
         return np.mean(wup_scores)
@@ -78,6 +77,6 @@ class WuPalmerScoreCalculator:
         preds = logits.argmax(axis=-1)
         return {
             "wups": self.batch_wup_measure(labels, preds),
-            "acc": accuracy_score(labels, preds),
+            "accuracy": accuracy_score(labels, preds),
             "f1": f1_score(labels, preds, average='macro')
         }
