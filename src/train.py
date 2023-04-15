@@ -41,6 +41,7 @@ def trainMultimodalModelForVQA(config, device, dataset, collator, model, compute
         else:
             model_checkpoint=None
     else:
+        model_checkpoint=None
         print("lần đầu làm chuyện ấy")
 
     optimizers = (optimizer, scheduler)

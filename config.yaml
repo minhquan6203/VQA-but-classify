@@ -26,6 +26,7 @@ model:
   image_encoder: google/vit-base-patch16-224-in21k  # Valid transformer model for image encoding from HuggingFace
   intermediate_dims: 512
   dropout: 0.3
+  heads: 4
 
 early_stoping:
   early_stopping_patience: 5
