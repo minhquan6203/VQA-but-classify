@@ -3,6 +3,46 @@ import torch
 import torch.nn as nn
 from transformers import AutoModel
 
+class AnswerGenerator(nn.Module):
+    def __init__(
+            self,
+            hidden_size: int,
+            output_size: int,
+            num_layers: int,
+            dropout: float):
+     
+        super(AnswerGenerator, self).__init__()
+        self.hidden_size = hidden_size
+        self.output_size = output_size
+        self.num_layers = num_layers
+        self.dropout = dropout
+        self.embedding = nn.Embedding(output_size, hidden_size)
+        self.transformer = nn.Transformer(
+            d_model=hidden_size,
+            nhead=8,
+            num_encoder_layers=num_layers,
+            num_decoder_layers=num_layers,
+            dim_feedforward=2048,
+            dropout=dropout,
+        )
+        self.linear = nn.Linear(hidden_size, output_size)
+
+    def forward(
+            self,
+            input_ids: torch.LongTensor,
+            encoder_output: torch.Tensor,
+            encoder_mask: Optional[torch.LongTensor] = None):
+        
+        embedded = self.embedding(input_ids)
+        transformer_output = self.transformer(
+            embedded.transpose(0, 1),
+            encoder_output.transpose(0, 1),
+            tgt_mask=None,
+            src_key_padding_mask=encoder_mask.transpose(0, 1) if encoder_mask is not None else None,
+        )
+        output = self.linear(transformer_output.transpose(0, 1))
+        return output
+
 #lấy ý tưởng từ MCAN, apply multi head attention
 class MultimodalVQAModel(nn.Module):
     def __init__(
@@ -33,7 +73,7 @@ class MultimodalVQAModel(nn.Module):
             nn.ReLU(),
             nn.Dropout(dropout),
         )
-        self.classifier = nn.Linear(self.intermediate_dims, self.num_labels)
+        self.decoder = AnswerGenerator()
         self.criterion = nn.CrossEntropyLoss()
         self.num_attention_heads = num_attention_heads
         self.text_multihead = nn.MultiheadAttention(
@@ -43,7 +83,7 @@ class MultimodalVQAModel(nn.Module):
             self.intermediate_dims, num_attention_heads
         )
 
-    def forward(
+def forward(
             self,
             input_ids: torch.LongTensor,
             pixel_values: torch.FloatTensor,
@@ -79,16 +119,10 @@ class MultimodalVQAModel(nn.Module):
         attended_text = torch.sum(attention_weights[:, 0].unsqueeze(-1) * encoded_text['last_hidden_state'], dim=1)
         attended_image = torch.sum(attention_weights[:, 1].unsqueeze(-1) * encoded_image['last_hidden_state'], dim=1)
         fused_output = self.fusion(torch.cat([attended_text, attended_image], dim=1))
-        logits = self.classifier(fused_output)
-
-        out = {
-            "logits": logits
-        }
-        if labels is not None:
-            loss = self.criterion(logits, labels)
-            out["loss"] = loss
         
-        return out
+
+        
+        return answer_text
 
 
 

@@ -14,25 +14,30 @@ def preprocess(json_file,folder_output,img_error):
     data = json.load(f)
 
     #convert to csv file
-    df_image= pd.DataFrame.from_dict(data['images'])
-    
     df_qa = pd.DataFrame.from_dict(data['annotations'])
-    for img in img_error:
-      condition = df_qa['image_id'] == img.replace('.jpg','')
-      df_qa=df_qa.drop(df_qa[condition].index)
+
     for i in range(len(df_qa['image_id'])):
         df_qa['image_id'][i]=str(df_qa['image_id'][i])
         df_qa['question'][i]=str(df_qa['question'][i])
-        if len(df_qa['answer'][i])==0:
+        if len(df_qa['answer'][i])!=0 and df_qa['answer'][i] != 'nan':
+          df_qa['answer'][i]=str(df_qa['answer'][i])
+        else:
           df_qa['answer'][i]='đéo biết'
+
+    im=[]
+    for img in img_error:
+      im.append(str(img.replace('.jpg','')))
+    print(im)
+    df_qa = df_qa[~df_qa['image_id'].isin(im)]
     df_qa.to_csv(f'{path}/data1.csv',index=False)
+    df_qa=pd.read_csv(f'{path}/data1.csv')
 
     # answer_space.txt
     p = pathlib.Path(f'{path}/answer_space.txt')
     p.touch()
     with open(f'{path}/answer_space.txt', 'w',encoding='utf-8') as f:
         for i in range(len(df_qa['answer'])):
-          if len(df_qa['answer'][i]) !=0:
+          if len(df_qa['answer'][i]) !=0 and df_qa['answer'][i] != 'nan':
               f.write(df_qa['answer'][i])
           else:
             f.write('đéo biết')
@@ -42,7 +47,7 @@ def preprocess(json_file,folder_output,img_error):
         for i in range(len(df_qa['answer'])):
           f.write(df_qa['question'][i])
           f.write('\n')
-          if len(df_qa['answer'][i]) !=0:
+          if len(df_qa['answer'][i]) !=0 and df_qa['answer'][i] != 'nan':
               f.write(df_qa['answer'][i])
           else:
             f.write('đéo biết')
@@ -83,11 +88,8 @@ def resize_images(input_folder, output_folder, size):
 if __name__ == '__main__':
 
     img_error=resize_images('book_fahasa','./data_fahasa/book_fahasa',(512,512))
-    print(len(img_error))
+    print(img_error)
 
     json_file = '/content/drive/MyDrive/vivqa_on_book/new_b_all_fahasa_label.json'
     folder_output = 'data_fahasa'
     preprocess(json_file, folder_output,img_error)
-
-
-
