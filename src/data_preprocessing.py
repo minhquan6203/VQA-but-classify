@@ -6,13 +6,13 @@ import os
 from PIL import Image
 from sklearn.model_selection import train_test_split 
 
-def preprocess(json_file,folder_output,img_error):
+def preprocess(json_file,folder_output,img_error,path_img):
     os.makedirs(folder_output, exist_ok=True)
     path=folder_output
     # Read data
     f = open(json_file,encoding='utf-8')
     data = json.load(f)
-
+    
     #convert to csv file
     df_qa = pd.DataFrame.from_dict(data['annotations'])
 
@@ -23,12 +23,18 @@ def preprocess(json_file,folder_output,img_error):
           df_qa['answer'][i]=str(df_qa['answer'][i])
         else:
           df_qa['answer'][i]='đéo biết'
+    
 
-    im=[]
-    for img in img_error:
-      im.append(str(img.replace('.jpg','')))
-    print(im)
-    df_qa = df_qa[~df_qa['image_id'].isin(im)]
+    for i in range(len(img_error)):
+      img_error[i]=img_error[i].replace('.jpg','')
+    print(img_error)
+    df_qa = df_qa[~df_qa['image_id'].isin(img_error)]
+
+    file_img=os.listdir(path_img)
+    for i in range(len(file_img)):
+      file_img[i]=file_img[i].replace('.jpg','')
+    df_qa = df_qa[df_qa['image_id'].isin(file_img)]
+
     df_qa.to_csv(f'{path}/data1.csv',index=False)
     df_qa=pd.read_csv(f'{path}/data1.csv')
 
@@ -87,9 +93,9 @@ def resize_images(input_folder, output_folder, size):
 
 if __name__ == '__main__':
 
-    img_error=resize_images('book_fahasa','./data_fahasa/book_fahasa',(512,512))
+    img_error=resize_images('./book_fahasa','./data_fahasa/book_fahasa',(512,512))
     print(img_error)
 
     json_file = '/content/drive/MyDrive/vivqa_on_book/new_b_all_fahasa_label.json'
     folder_output = 'data_fahasa'
-    preprocess(json_file, folder_output,img_error)
+    preprocess(json_file, folder_output,img_error,'./data_fahasa/book_fahasa')
