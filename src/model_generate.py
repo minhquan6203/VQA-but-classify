@@ -34,7 +34,7 @@ class MultimodalVQAModel(nn.Module):
             nn.ReLU(),
             nn.Dropout(dropout),
         )
-        self.decoder = Decoder(vocab_size=len(self.num_labels),embedding_dim=512,hidden_dim=30)
+        self.decoder = Decoder('gpt2')
         self.criterion = nn.CrossEntropyLoss()
         self.num_attention_heads = num_attention_heads
         self.text_multihead = nn.MultiheadAttention(
@@ -80,7 +80,7 @@ class MultimodalVQAModel(nn.Module):
         attended_text = torch.sum(attention_weights[:, 0].unsqueeze(-1) * encoded_text['last_hidden_state'], dim=1)
         attended_image = torch.sum(attention_weights[:, 1].unsqueeze(-1) * encoded_image['last_hidden_state'], dim=1)
         fused_output = self.fusion(torch.cat([attended_text, attended_image], dim=1))
-        logits=self.decoder(fused_output,labels)
+        logits=self.decoder(fused_output)
 
         out = {
             "logits": logits
