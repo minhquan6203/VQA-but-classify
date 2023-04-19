@@ -6,8 +6,8 @@ from vision_embedding import Vision_Embedding
 from text_embedding import Text_Embedding
 from instance import Instance
 from decoder import Decoder
+from encoder import CoAttentionEncoder
 from beam_search import BeamSearch
-
 
 class BaseTransformer(nn.Module):
     def __init__(self, config, vocab):
@@ -63,8 +63,8 @@ class ViTmBERTGeneration(BaseTransformer):
 
         self.device = torch.device(config.DEVICE)
 
-        self.vision_encoder = Vision_Embedding(config)
-        self.text_encoder = Text_Embedding(config, vocab)
+        self.vision_embedding = Vision_Embedding(config)
+        self.text_embedding = Text_Embedding(config, vocab)
 
         self.fusion = nn.Linear(config.MODEL.D_MODEL, config.MODEL.D_MODEL)
         self.gelu = nn.GELU()
@@ -72,6 +72,7 @@ class ViTmBERTGeneration(BaseTransformer):
         self.norm = nn.LayerNorm(config.MODEL.D_MODEL)
 
         self.decoder = Decoder(config, vocab)
+        self.encoder = CoAttentionEncoder(config)
 
     def forward(self, inputs: Instance):
         fused_features, fused_padding_mask = self.encoder_forward(inputs)
@@ -89,12 +90,11 @@ class ViTmBERTGeneration(BaseTransformer):
         images = inputs.images
         questions = inputs.question
 
-        vision_features, vision_padding_mask = self.vision_encoder(images)
-        text_features, text_padding_mask = self.text_encoder(questions)
-
+        vision_features, vision_padding_mask = self.vision_embedding(images)
+        text_features, text_padding_mask = self.text_embedding(questions)
+        vision_features,text_features=self.encoder(vision_features,vision_padding_mask,text_features,text_padding_mask)
         fused_features = torch.cat([vision_features, text_features], dim=1)
         fused_features = self.gelu(self.fusion(fused_features))
         fused_features = self.dropout(fused_features)
         fused_padding_mask = torch.cat([vision_padding_mask, text_padding_mask], dim=-1)
-
         return fused_features, fused_padding_mask

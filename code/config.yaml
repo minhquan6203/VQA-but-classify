@@ -54,6 +54,10 @@ DECODER:
   LAYERS: 3
   LANGUAGE_MODEL: bert-base-multilingual-uncased
 
+ENCODER:
+    D_MODEL: 512
+    LAYERS: 8
+
 ATTENTION:
   HEAD: 8
   D_MODEL: 512
@@ -65,10 +69,3 @@ ATTENTION:
   CAN_BE_STATEFUL: True
   DROPOUT: .1
 
-    TEXT_EMBEDDING:
-      ARCHITECTURE: UsualEmbedding
-      D_MODEL: 512
-      D_EMBEDDING: 300
-      WORD_EMBEDDING: null
-      WORD_EMBEDDING_CACHE: null
-      DROPOUT: 0.1

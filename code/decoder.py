@@ -37,8 +37,7 @@ class Decoder(nn.Module):
         self.word_emb = Text_Embedding(config)
         self.pos_emb = nn.Embedding.from_pretrained(sinusoid_encoding_table(max_len=self.max_len+1,
                                                                             d_model=config.DECODER.D_MODEL, padding_idx=0), freeze=True)
-        self.layers = nn.ModuleList([DecoderLayer(config) if i < config.DECODER.LAYERS else DecoderLayer(config) 
-                                                for i in range(config.DECODER.LAYERS + 1)])
+        self.layers = self.layers = nn.ModuleList([DecoderLayer(config) for _ in range(self.N)])
         self.fc = nn.Linear(config.DECODER.D_MODEL, len(vocab), bias=False)
 
         # load and froze the language model

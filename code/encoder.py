@@ -25,19 +25,19 @@ class CoAttentionEncoder(nn.Module):
     def __init__(self, config):
         super(CoAttentionEncoder, self).__init__()
 
-        self.pos_embedding = SinusoidPositionalEmbedding(config.D_MODEL)
-        self.vision_layer_norm = nn.LayerNorm(config.D_MODEL)
-        self.language_layer_norm = nn.LayerNorm(config.D_MODEL)
+        self.pos_embedding = SinusoidPositionalEmbedding(config.ENCODER.D_MODEL)
+        self.vision_layer_norm = nn.LayerNorm(config.ENCODER.D_MODEL)
+        self.language_layer_norm = nn.LayerNorm(config.ENCODER.D_MODEL)
 
-        self.d_model = config.D_MODEL
+        self.d_model = config.ENCODER.D_MODEL
 
         # cross-attention layers
-        self.vision_language_attn_layers = nn.ModuleList([EncoderLayer(config.VISION_LANGUAGE_ATTENTION) for _ in range(config.LAYERS)])
-        self.language_vision_attn_layers = nn.ModuleList([EncoderLayer(config.LANGUAGE_VISION_ATTENTION) for _ in range(config.LAYERS)])
+        self.vision_language_attn_layers = nn.ModuleList([EncoderLayer(config) for _ in range(config.ENCODER.LAYERS)])
+        self.language_vision_attn_layers = nn.ModuleList([EncoderLayer(config) for _ in range(config.ENCODER.LAYERS)])
 
         # self-attention layers
-        self.vision_self_attn_layers = nn.ModuleList([EncoderLayer(config.VISION_SELF_ATTENTION) for _ in range(config.LAYERS)])
-        self.language_self_attn_layers = nn.ModuleList([EncoderLayer(config.LANGUAGE_SELF_ATTENTION) for _ in range(config.LAYERS)])
+        self.vision_self_attn_layers = nn.ModuleList([EncoderLayer(config) for _ in range(config.ENCODER.LAYERS)])
+        self.language_self_attn_layers = nn.ModuleList([EncoderLayer(config) for _ in range(config.ENCODER.LAYERS)])
 
     def forward(self, vision_features: torch.Tensor, vision_padding_mask: torch.Tensor, 
                 language_features: torch.Tensor, language_padding_mask: torch.Tensor):
