@@ -130,9 +130,9 @@ class OpenEndedTask(BaseTask):
         super().__init__(config)
 
     def load_feature_datasets(self, config):
-        train_dataset = RawQuestionImageDataset(config.JSON_PATH.TRAIN, self.vocab, config)
-        dev_dataset = RawQuestionImageDataset(config.JSON_PATH.DEV, self.vocab, config)
-        test_dataset = RawQuestionImageDataset(config.JSON_PATH.TEST, self.vocab, config)
+        train_dataset = RawQuestionImageDataset(config.DATASET.TRAIN, self.vocab, config)
+        dev_dataset = RawQuestionImageDataset(config.DATASET.DEV, self.vocab, config)
+        test_dataset = RawQuestionImageDataset(config.DATASET.TEST, self.vocab, config)
 
         return train_dataset, dev_dataset, test_dataset
 

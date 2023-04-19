@@ -3,8 +3,10 @@ DEVICE: cuda
 DATASET:
     BATCH_SIZE: 64
     WORKERS: 2
-    FEATURE_PATH:
-      IMAGE: image
+    IMAGE_PATH: image
+    TRAIN: train.json
+    DEV: dev.json
+    TEST: test.json
 
 VOCAB:
   TOKENIZER: null
@@ -15,12 +17,10 @@ VOCAB:
   EOS_TOKEN: <eos>
   PAD_TOKEN: <pad>
   UNK_TOKEN: <unk>
-  
-JSON_PATH:
   TRAIN: train.json
   DEV: dev.json
   TEST: test.json
-
+  
 TRAINING:
   CHECKPOINT_PATH: save
   LEARNING_RATE: 1
@@ -32,7 +32,7 @@ TRAINING:
   PATIENCE: 5
 
 VISION_EMBEDDING:
-  PRETRAINED_NAME: vit
+  PRETRAINED_NAME: google/vit-base-patch16-224-in21k
   D_FEATURE: 768
   D_MODEL: 512
   DROPOUT: .1

@@ -22,9 +22,9 @@ class Vocab(object):
         self.unk_token = config.UNK_TOKEN
 
         self.make_vocab([
-            config.JSON_PATH.TRAIN,
-            config.JSON_PATH.DEV,
-            config.JSON_PATH.TEST
+            config.VOCAB.TRAIN,
+            config.VOCAB.DEV,
+            config.VOCAB.TEST
         ])
         counter = self.freqs.copy()
     
@@ -175,9 +175,9 @@ class MultiModalVocab(Vocab):
         self.unk_token = config.VOCAB.UNK_TOKEN
 
         self.make_vocab([
-            config.JSON_PATH.TRAIN,
-            config.JSON_PATH.DEV,
-            config.JSON_PATH.TEST
+            config.VOCAB.TRAIN,
+            config.VOCAB.DEV,
+            config.VOCAB.TEST
         ])
         counter = self.freqs.copy()
     
