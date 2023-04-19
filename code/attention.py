@@ -8,10 +8,10 @@ class self_attention(nn.Module):
     def __init__(self, config):
         super(self_attention, self).__init__()
 
-        d_model = config.D_MODEL
-        h = config.HEAD
-        d_k = config.D_KEY
-        d_v = config.D_VALUE
+        d_model = config.ATTENTION.D_MODEL
+        h = config.ATTENTION.HEAD
+        d_k = config.ATTENTION.D_KEY
+        d_v = config.ATTENTION.D_VALUE
 
         self.fc_q = nn.Linear(d_model, h * d_k)
         self.fc_k = nn.Linear(d_model, h * d_k)
@@ -60,9 +60,9 @@ class MultiHeadAttention(nn.Module):
     def __init__(self, config):
         super(MultiHeadAttention, self).__init__()
         
-        d_model = config.D_MODEL
+        d_model = config.ATTENTION.D_MODEL
 
-        self.use_aoa = config.USE_AOA # whether to use Attention on Attention (AoA) mechanism or not
+        self.use_aoa = config.ATTENTION.USE_AOA # whether to use Attention on Attention (AoA) mechanism or not
         
         if self.use_aoa:    # define additionally AoA layers
             self.informative_attention = nn.Linear(2*d_model, d_model)
@@ -70,10 +70,10 @@ class MultiHeadAttention(nn.Module):
 
         self.attention = self_attention(config)
 
-        self.dropout = nn.Dropout(p=config.DROPOUT)
+        self.dropout = nn.Dropout(p=config.ATTENTION.DROPOUT)
         self.layer_norm = nn.LayerNorm(d_model)
 
-        self.can_be_stateful = config.CAN_BE_STATEFUL
+        self.can_be_stateful = config.ATTENTION.CAN_BE_STATEFUL
         if self.can_be_stateful:
             self.register_state('running_keys', torch.zeros((0, d_model)))
             self.register_state('running_values', torch.zeros((0, d_model)))

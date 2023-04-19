@@ -58,7 +58,7 @@ class Vocab(object):
 
         self.word_embeddings = None
         if config.WORD_EMBEDDING is not None:
-            self.load_word_embeddings(WordEmbedding(config))
+            self.load_word_embeddings(WordEmbedding(name=config.VOCAB.WORD_EMBEDDING,cache=config.VOCAB.WORD_EMBEDDING_CACHE))
 
     def make_vocab(self, json_dirs):
         self.freqs = Counter()
@@ -155,17 +155,6 @@ class Vocab(object):
             assert(start_dim == tot_dim)
 
     def set_vectors(self, stoi, word_embeddings, dim):
-        """
-        Set the word_embeddings for the Vocab instance from a collection of Tensors.
-        Arguments:
-            stoi: A dictionary of string to the index of the associated vector
-                in the `word_embeddings` input argument.
-            word_embeddings: An indexed iterable (or other structure supporting __getitem__) that
-                given an input index, returns a FloatTensor representing the vector
-                for the token associated with the index. For example,
-                vector[stoi["string"]] should return the vector for "string".
-            dim: The dimensionality of the word_embeddings.
-        """
         self.word_embeddings = torch.Tensor(len(self), dim)
         for i, token in self.itos.items():
             we_index = stoi.get(token, None)
@@ -184,11 +173,6 @@ class MultiModalVocab(Vocab):
         self.bos_token = config.VOCAB.BOS_TOKEN
         self.eos_token = config.VOCAB.EOS_TOKEN
         self.unk_token = config.VOCAB.UNK_TOKEN
-        self.img_token = config.VOCAB.IMG_TOKEN
-        self.feat_token = config.VOCAB.FEAT_TOKEN
-        self.box_token = config.VOCAB.BOX_TOKEN
-        self.question_token = config.VOCAB.QUESTION_TOKEN
-        self.answer_token = config.VOCAB.ANSWER_TOKEN
 
         self.make_vocab([
             config.JSON_PATH.TRAIN,
@@ -197,10 +181,9 @@ class MultiModalVocab(Vocab):
         ])
         counter = self.freqs.copy()
     
-        min_freq = max(config.MIN_FREQ, 1)
+        min_freq = max(config.VOCAB.MIN_FREQ, 1)
 
-        specials = [self.padding_token, self.bos_token, self.eos_token, self.unk_token, self.img_token,
-                    self.feat_token, self.box_token, self.question_token, self.answer_token]
+        specials = [self.padding_token, self.bos_token, self.eos_token, self.unk_token]
         itos = specials
         # frequencies of special tokens are not counted when building vocabulary
         # in frequency order
@@ -226,12 +209,7 @@ class MultiModalVocab(Vocab):
         self.bos_idx = self.stoi[self.bos_token]
         self.eos_idx = self.stoi[self.eos_token]
         self.unk_idx = self.stoi[self.unk_token]
-        self.img_idx = self.stoi[self.img_token]
-        self.feat_idx = self.stoi[self.feat_token]
-        self.box_idx = self.stoi[self.box_token]
-        self.question_idx = self.stoi[self.question_token]
-        self.answer_idx = self.stoi[self.answer_token]
 
         self.word_embeddings = None
         if config.VOCAB.WORD_EMBEDDING is not None:
-            self.load_word_embeddings(WordEmbedding(config))
+            self.load_word_embeddings(WordEmbedding(name=config.VOCAB.WORD_EMBEDDING,cache=config.VOCAB.WORD_EMBEDDING_CACHE))

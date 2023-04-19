@@ -16,7 +16,7 @@ class BaseTransformer(nn.Module):
         self.vocab = vocab
         self.max_len = vocab.max_answer_length
         self.eos_idx = vocab.eos_idx
-        self.d_model = config.D_MODEL
+        self.d_model = config.MODEL.D_MODEL
 
         self.register_state('encoder_features', None)
         self.register_state('encoder_padding_mask', None)
@@ -63,15 +63,15 @@ class ViTmBERTGeneration(BaseTransformer):
 
         self.device = torch.device(config.DEVICE)
 
-        self.vision_encoder = Vision_Embedding(config.VISION_EMBEDDING)
-        self.text_embedding = Text_Embedding(config.TEXT_EMBEDDING, vocab)
+        self.vision_encoder = Vision_Embedding(config)
+        self.text_encoder = Text_Embedding(config, vocab)
 
-        self.fusion = nn.Linear(config.D_MODEL, config.D_MODEL)
+        self.fusion = nn.Linear(config.MODEL.D_MODEL, config.MODEL.D_MODEL)
         self.gelu = nn.GELU()
-        self.dropout = nn.Dropout(config.DROPOUT)
-        self.norm = nn.LayerNorm(config.D_MODEL)
+        self.dropout = nn.Dropout(config.MODEL.DROPOUT)
+        self.norm = nn.LayerNorm(config.MODEL.D_MODEL)
 
-        self.decoder = Decoder(config.DECODER, vocab)
+        self.decoder = Decoder(config, vocab)
 
     def forward(self, inputs: Instance):
         fused_features, fused_padding_mask = self.encoder_forward(inputs)
@@ -90,7 +90,7 @@ class ViTmBERTGeneration(BaseTransformer):
         questions = inputs.question
 
         vision_features, vision_padding_mask = self.vision_encoder(images)
-        text_features, text_padding_mask = self.text_embedding(questions)
+        text_features, text_padding_mask = self.text_encoder(questions)
 
         fused_features = torch.cat([vision_features, text_features], dim=1)
         fused_features = self.gelu(self.fusion(fused_features))

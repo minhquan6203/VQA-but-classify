@@ -13,9 +13,9 @@ class DecoderLayer(nn.Module):
     def __init__(self, config):
         super(DecoderLayer, self).__init__()
 
-        self.self_attn = MultiHeadAttention(config.SELF_ATTENTION)
-        self.enc_attn = MultiHeadAttention(config.ENC_ATTENTION)
-        self.pwff = PositionWiseFeedForward(config.ENC_ATTENTION)
+        self.self_attn = MultiHeadAttention(config)
+        self.enc_attn = MultiHeadAttention(config)
+        self.pwff = PositionWiseFeedForward(config)
 
     def forward(self, queries, keys, values, self_attention_mask, enc_attention_mask, **kwargs):
         self_att = self.self_attn(queries, queries, queries, attention_mask=self_attention_mask, **kwargs)
@@ -29,20 +29,20 @@ class Decoder(nn.Module):
     def __init__(self, config, vocab):
         super(Decoder, self).__init__()
 
-        self.d_model = config.D_MODEL
+        self.d_model = config.DECODER.D_MODEL
         self.max_len = vocab.max_answer_length
         self.padding_idx = vocab.padding_idx
-        self.N = config.LAYERS
+        self.N = config.DECODER.LAYERS
 
-        self.word_emb = Text_Embedding(config.TEXT_EMBEDDING)
+        self.word_emb = Text_Embedding(config)
         self.pos_emb = nn.Embedding.from_pretrained(sinusoid_encoding_table(max_len=self.max_len+1,
-                                                                            d_model=config.D_MODEL, padding_idx=0), freeze=True)
-        self.layers = nn.ModuleList([DecoderLayer(config.ATTENTION) if i < config.LAYERS else DecoderLayer(config._ATTENTION) 
-                                                for i in range(config.LAYERS + 1)])
-        self.fc = nn.Linear(config.D_MODEL, len(vocab), bias=False)
+                                                                            d_model=config.DECODER.D_MODEL, padding_idx=0), freeze=True)
+        self.layers = nn.ModuleList([DecoderLayer(config) if i < config.DECODER.LAYERS else DecoderLayer(config) 
+                                                for i in range(config.DECODER.LAYERS + 1)])
+        self.fc = nn.Linear(config.DECODER.D_MODEL, len(vocab), bias=False)
 
         # load and froze the language model
-        self.language_model = Language_Model(config.LANGUAGE_MODEL)
+        self.language_model = Language_Model(config.DECODER.LANGUAGE_MODEL)
 
         self.register_state('running_mask_self_attention', torch.zeros((1, 1, 0)).byte())
         self.register_state('running_seq', torch.zeros((1,)).long())

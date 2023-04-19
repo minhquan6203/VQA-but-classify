@@ -14,15 +14,15 @@ class Text_Embedding(nn.Module):
 
         self.device = config.DEVICE
 
-        self.tokenizer = AutoTokenizer.from_pretrained(config.PRETRAINED_NAME)
-        self.embedding = AutoModel.from_pretrained(config.PRETRAINED_NAME)
+        self.tokenizer = AutoTokenizer.from_pretrained(config.TEXT_EMBEDDING.PRETRAINED_NAME)
+        self.embedding = AutoModel.from_pretrained(config.TEXT_EMBEDDING.PRETRAINED_NAME)
         # freeze all parameters of pretrained model
         for param in self.embedding.parameters():
             param.requires_grad = False
 
-        self.proj = nn.Linear(config.D_PRETRAINED_FEATURE, config.D_MODEL)
+        self.proj = nn.Linear(config.TEXT_EMBEDDING.D_FEATURE, config.TEXT_EMBEDDING.D_MODEL)
         self.gelu = nn.GELU()
-        self.dropout = nn.Dropout(config.DROPOUT)
+        self.dropout = nn.Dropout(config.TEXT_EMBEDDING.DROPOUT)
 
     def forward(self, questions: List[str]):
         inputs = self.tokenizer(questions, return_tensors="pt", padding=True).to(self.device)

@@ -12,15 +12,15 @@ class Vision_Embedding(nn.Module):
 
         self.device = torch.device(config.DEVICE)
 
-        self.feature_extractor = AutoFeatureExtractor.from_pretrained(config.PRETRAINED_NAME)
-        self.backbone = AutoModel.from_pretrained(config.PRETRAINED_NAME)
+        self.feature_extractor = AutoFeatureExtractor.from_pretrained(config.VISION_EMBEDDING.PRETRAINED_NAME)
+        self.backbone = AutoModel.from_pretrained(config.VISION_EMBEDDING.PRETRAINED_NAME)
         # freeze all parameters of pretrained model
         for param in self.backbone.parameters():
             param.requires_grad = False
 
-        self.proj = nn.Linear(config.D_PRETRAINED_FEATURE, config.D_MODEL)
+        self.proj = nn.Linear(config.VISION_EMBEDDING.D_PRETRAINED_FEATURE, config.VISION_EMBEDDING.D_MODEL)
         self.gelu = nn.GELU()
-        self.dropout = nn.Dropout(config.DROPOUT)
+        self.dropout = nn.Dropout(config.VISION_EMBEDDING.DROPOUT)
 
     def forward(self, images: List[Image.Image]):
         inputs = self.feature_extractor(images, return_tensors="pt").to(self.device)

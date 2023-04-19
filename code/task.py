@@ -33,7 +33,7 @@ class BaseTask:
 
         if not os.path.isfile(os.path.join(self.checkpoint_path, "vocab.bin")):
             logger.info("Creating vocab")
-            self.vocab = self.load_vocab(config.DATASET.VOCAB)
+            self.vocab = self.load_vocab(config)
             logger.info("Saving vocab to %s" % os.path.join(self.checkpoint_path, "vocab.bin"))
             pickle.dump(self.vocab, open(os.path.join(self.checkpoint_path, "vocab.bin"), "wb"))
         else:
@@ -41,13 +41,13 @@ class BaseTask:
             self.vocab = pickle.load(open(os.path.join(self.checkpoint_path, "vocab.bin"), "rb"))
 
         logger.info("Loading data")
-        self.load_datasets(config.DATASET)
+        self.load_datasets(config)
         self.create_dataloaders(config)
 
         logger.info("Building model")
-        self.model = ViTmBERTGeneration(config.MODEL, self.vocab)
+        self.model = ViTmBERTGeneration(config, self.vocab)
         self.config = config
-        self.device = torch.device(config.MODEL.DEVICE)
+        self.device = torch.device(config.DEVICE)
 
         logger.info("Defining optimizer and objective function")
         self.configuring_hyperparameters(config)
@@ -111,11 +111,7 @@ class BaseTask:
             'epoch': self.epoch,
             'state_dict': self.model.state_dict(),
             'optimizer': self.optim.state_dict(),
-            'scheduler': self.scheduler.state_dict(),
-            'train_loss':self.train_loss,
-            'val_los':self.val_loss,
-            'train_score':self.train_score,
-            'val_score':self.vall_score
+            'scheduler': self.scheduler.state_dict()
         }
 
         for key, value in dict_for_updating.items():
@@ -134,9 +130,9 @@ class OpenEndedTask(BaseTask):
         super().__init__(config)
 
     def load_feature_datasets(self, config):
-        train_dataset = RawQuestionImageDataset(config.JSON_PATH.TRAIN, self.vocab, config.FEATURE_DATASET)
-        dev_dataset = RawQuestionImageDataset(config.JSON_PATH.DEV, self.vocab, config.FEATURE_DATASET)
-        test_dataset = RawQuestionImageDataset(config.JSON_PATH.TEST, self.vocab, config.FEATURE_DATASET)
+        train_dataset = RawQuestionImageDataset(config.JSON_PATH.TRAIN, self.vocab, config)
+        dev_dataset = RawQuestionImageDataset(config.JSON_PATH.DEV, self.vocab, config)
+        test_dataset = RawQuestionImageDataset(config.JSON_PATH.TEST, self.vocab, config)
 
         return train_dataset, dev_dataset, test_dataset
 
@@ -146,30 +142,27 @@ class OpenEndedTask(BaseTask):
 
 
     def create_feature_dataloaders(self, config):
-        # creating iterable-dataset data loader
         self.train_dataloader = DataLoader(
             dataset=self.train_dataset,
-            batch_size=config.DATASET.FEATURE_DATASET.BATCH_SIZE,
+            batch_size=config.DATASET.BATCH_SIZE,
             shuffle=True,
-            num_workers=config.DATASET.FEATURE_DATASET.WORKERS,
+            num_workers=config.DATASET.WORKERS,
             collate_fn=collate_fn
         )
         self.dev_dataloader = DataLoader(
             dataset=self.dev_dataset,
-            batch_size=config.DATASET.FEATURE_DATASET.BATCH_SIZE,
+            batch_size=config.DATASET.BATCH_SIZE,
             shuffle=True,
-            num_workers=config.DATASET.FEATURE_DATASET.WORKERS,
+            num_workers=config.DATASET.WORKERS,
             collate_fn=collate_fn
         )
         self.test_dataloader = DataLoader(
             dataset=self.test_dataset,
             batch_size=1,
             shuffle=True,
-            num_workers=config.DATASET.FEATURE_DATASET.WORKERS,
+            num_workers=config.DATASET.WORKERS,
             collate_fn=collate_fn
         )
-
- 
 
     def create_dataloaders(self, config):
         self.create_feature_dataloaders(config)
@@ -260,7 +253,6 @@ class OpenEndedTask(BaseTask):
             self.epoch = checkpoint["epoch"] + 1
             self.optim.load_state_dict(checkpoint['optimizer'])
             self.scheduler.load_state_dict(checkpoint['scheduler'])
-           
         else:
             best_val_score = 0.
             patience = 0
@@ -285,7 +277,6 @@ class OpenEndedTask(BaseTask):
             else:
                 patience += 1
 
-            # switch_to_rl = False
             exit_train = False
 
             if patience == self.patience:
