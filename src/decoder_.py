@@ -1,7 +1,7 @@
 import torch
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 
-class VQAGPT2Decoder(torch.nn.Module):
+class Decoder(torch.nn.Module):
     def __init__(self, pretrained_model_name_or_path):
         super().__init__()
         self.gpt2_model = GPT2LMHeadModel.from_pretrained(pretrained_model_name_or_path)
