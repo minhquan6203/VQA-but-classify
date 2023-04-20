@@ -28,7 +28,7 @@ class BaseDataset(data.Dataset):
     def load_annotations(self, json_data: Dict) -> List[Dict]:
         raise NotImplementedError
 
-    def load_images(self, filename: int) -> Dict[str, Any]:
+    def load_images(self, filename: str) -> Dict[str, Any]:
         image_file = os.path.join(self.image_path,filename)
         images=Image.open(image_file).convert('RGB')
         return images

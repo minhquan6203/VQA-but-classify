@@ -85,8 +85,8 @@ class ViTmBERTGeneration(BaseTransformer):
         return F.log_softmax(out, dim=-1)
 
     def encoder_forward(self, inputs: Instance):
-        images = inputs.images
-        questions = inputs.question
+        images = inputs.images.to(self.device)
+        questions = inputs.question.to(self.device)
 
         vision_features, vision_padding_mask = self.vision_embedding(images)
         text_features, text_padding_mask = self.text_embedding(questions)
