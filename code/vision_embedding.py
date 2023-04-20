@@ -18,7 +18,7 @@ class Vision_Embedding(nn.Module):
         for param in self.backbone.parameters():
             param.requires_grad = False
 
-        self.proj = nn.Linear(config.VISION_EMBEDDING.D_PRETRAINED_FEATURE, config.VISION_EMBEDDING.D_MODEL)
+        self.proj = nn.Linear(config.VISION_EMBEDDING.D_FEATURE, config.VISION_EMBEDDING.D_MODEL)
         self.gelu = nn.GELU()
         self.dropout = nn.Dropout(config.VISION_EMBEDDING.DROPOUT)
 

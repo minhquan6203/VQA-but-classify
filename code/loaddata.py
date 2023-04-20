@@ -1,9 +1,10 @@
 import torch
 from instance import Instance
+from PIL import Image
 from typing import Dict, List
 import torch
 from torch.utils import data
-
+from process_text import preprocess_sentence
 import json
 import os
 import numpy as np
@@ -22,14 +23,15 @@ class BaseDataset(data.Dataset):
         self.annotations = self.load_annotations(json_data)
 
         # image features
-        self.ima_path = config.DATASET.IMAGE_PATH
+        self.image_path = config.DATASET.IMAGE_PATH
 
     def load_annotations(self, json_data: Dict) -> List[Dict]:
         raise NotImplementedError
 
     def load_images(self, filename: int) -> Dict[str, Any]:
         image_file = os.path.join(self.image_path,filename)
-        return image_file
+        images=Image.open(image_file).convert('RGB')
+        return images
 
     def __getitem__(self, idx: int):
         raise NotImplementedError("Please inherit the BaseDataset class and implement the __getitem__ method")
@@ -57,6 +59,7 @@ class RawQuestionImageDataset(BaseDataset):
                 if image["id"] == ann["image_id"]:
                     for answer in ann["answers"]:
                         question = ann["question"]
+                        answer=preprocess_sentence(answer, self.vocab.tokenizer)
                         annotation = {
                             "question": question,
                             "answer": answer,

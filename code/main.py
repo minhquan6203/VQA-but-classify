@@ -1,7 +1,7 @@
 import argparse
 
 from get_config import get_config
-from task import ViTmBERTGeneration
+from task import OpenEndedTask
 from logging_utils import setup_logger
 
 logger = setup_logger()

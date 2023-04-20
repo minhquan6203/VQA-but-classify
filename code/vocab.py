@@ -202,8 +202,7 @@ class MultiModalVocab(Vocab):
         self.itos = {i: tok for i, tok in enumerate(itos)}
         self.stoi = {tok: i for i, tok in enumerate(itos)}
 
-        self.specials = [self.padding_token, self.bos_token, self.eos_token, self.unk_token, self.img_token,
-                    self.feat_token, self.box_token, self.question_token, self.answer_token]
+        self.specials = [self.padding_token, self.bos_token, self.eos_token, self.unk_token]
 
         self.padding_idx = self.stoi[self.padding_token]
         self.bos_idx = self.stoi[self.bos_token]

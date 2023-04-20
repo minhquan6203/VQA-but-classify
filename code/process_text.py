@@ -2,7 +2,7 @@ from transformers import AutoTokenizer
 import torch
 import re
 from typing import List
-from utils.instance import Instance, InstanceList
+from instance import Instance, InstanceList
 
 def get_tokenizer(tokenizer):
     if callable(tokenizer):

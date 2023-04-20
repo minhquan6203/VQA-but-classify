@@ -7,7 +7,7 @@ from torch.optim.lr_scheduler import LambdaLR
 from generate_model import ViTmBERTGeneration
 from vocab import MultiModalVocab
 from logging_utils import setup_logger
-from data_utils.utils import collate_fn
+from process_text import collate_fn
 from loaddata import RawQuestionImageDataset
 import evaluation
 from evaluation import Cider

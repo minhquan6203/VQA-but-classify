@@ -10,9 +10,9 @@ class PositionWiseFeedForward(nn.Module):
     def __init__(self, config) -> None:
         super(PositionWiseFeedForward, self).__init__()
 
-        d_model = config.D_MODEL
-        d_ff = config.D_FF
-        dropout = config.DROPOUT
+        d_model = config.ATTENTION.D_MODEL
+        d_ff = config.ATTENTION.D_FF
+        dropout = config.ATTENTION.DROPOUT
 
         self.fc1 = nn.Linear(d_model, d_ff)
         self.fc2 = nn.Linear(d_ff, d_model)

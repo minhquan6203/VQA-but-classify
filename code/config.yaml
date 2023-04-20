@@ -3,10 +3,10 @@ DEVICE: cuda
 DATASET:
     BATCH_SIZE: 64
     WORKERS: 2
-    IMAGE_PATH: image
-    TRAIN: train.json
-    DEV: dev.json
-    TEST: test.json
+    IMAGE_PATH: /content/train
+    TRAIN: /content/vivqa_train.json
+    DEV: /content/vivqa_dev.json
+    TEST: /content/vivqa_test.json
 
 VOCAB:
   TOKENIZER: null
@@ -17,9 +17,9 @@ VOCAB:
   EOS_TOKEN: <eos>
   PAD_TOKEN: <pad>
   UNK_TOKEN: <unk>
-  TRAIN: train.json
-  DEV: dev.json
-  TEST: test.json
+  TRAIN: /content/vivqa_train.json
+  DEV: /content/vivqa_dev.json
+  TEST: /content/vivqa_test.json
   
 TRAINING:
   CHECKPOINT_PATH: save

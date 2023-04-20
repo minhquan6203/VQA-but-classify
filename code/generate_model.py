@@ -18,8 +18,6 @@ class BaseTransformer(nn.Module):
         self.eos_idx = vocab.eos_idx
         self.d_model = config.MODEL.D_MODEL
 
-        self.register_state('encoder_features', None)
-        self.register_state('encoder_padding_mask', None)
 
     def init_weights(self):
         for p in self.parameters():
@@ -64,7 +62,7 @@ class ViTmBERTGeneration(BaseTransformer):
         self.device = torch.device(config.DEVICE)
 
         self.vision_embedding = Vision_Embedding(config)
-        self.text_embedding = Text_Embedding(config, vocab)
+        self.text_embedding = Text_Embedding(config)
 
         self.fusion = nn.Linear(config.MODEL.D_MODEL, config.MODEL.D_MODEL)
         self.gelu = nn.GELU()

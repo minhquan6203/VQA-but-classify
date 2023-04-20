@@ -73,10 +73,10 @@ class MultiHeadAttention(nn.Module):
         self.dropout = nn.Dropout(p=config.ATTENTION.DROPOUT)
         self.layer_norm = nn.LayerNorm(d_model)
 
-        self.can_be_stateful = config.ATTENTION.CAN_BE_STATEFUL
-        if self.can_be_stateful:
-            self.register_state('running_keys', torch.zeros((0, d_model)))
-            self.register_state('running_values', torch.zeros((0, d_model)))
+        # self.can_be_stateful = config.ATTENTION.CAN_BE_STATEFUL
+        # if self.can_be_stateful:
+        #     self.register_state('running_keys', torch.zeros((0, d_model)))
+        #     self.register_state('running_values', torch.zeros((0, d_model)))
 
     def forward(self, queries, keys, values, attention_mask, **kwargs):
         if self.can_be_stateful and self._is_stateful:

@@ -23,7 +23,7 @@ class Language_Model(nn.Module):
         self.proj_to_caption_model = nn.Linear(hidden_size, d_model)
 
         self.pos_emb = nn.Embedding.from_pretrained(sinusoid_encoding_table(max_len + 1, d_model, 0), freeze=True)
-        self.encoder_layer = EncoderLayer(d_model, d_k, d_v, h, d_ff, dropout)
+        self.encoder_layer = EncoderLayer()
         self.proj_to_vocab = nn.Linear(d_model, vocab_size)
 
     def forward(self, input_ids, attention_mask=None, token_type_ids=None, position_ids=None, head_mask=None, inputs_embeds=None,
