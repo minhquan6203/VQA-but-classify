@@ -10,7 +10,7 @@ from logging_utils import setup_logger
 from process_text import collate_fn
 from loaddata import RawQuestionImageDataset
 import evaluation
-from evaluation import Cider
+from evaluation.cider import Cider
 
 import os
 import numpy as np

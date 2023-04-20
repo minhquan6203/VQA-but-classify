@@ -13,7 +13,7 @@ args = parser.parse_args()
 
 config = get_config(args.config_file)
 
-task = ViTmBERTGeneration(config)
+task = OpenEndedTask(config)
 task.start()
 task.get_predictions()
 logger.info("Task done.")

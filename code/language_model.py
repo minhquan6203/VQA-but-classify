@@ -8,7 +8,7 @@ from utils import generate_sequential_mask, sinusoid_encoding_table, generate_pa
 
 
 class Language_Model(nn.Module):
-    def __init__(self, pretrained_language_model_name, padding_idx=0, hidden_size=768, vocab_size=10201,
+    def __init__(self, config, pretrained_language_model_name, padding_idx=0, hidden_size=768, vocab_size=10201,
                     d_model=512, d_k=64, d_v=64, h=8, d_ff=2048, max_len=54, dropout=.1):
         super(Language_Model, self).__init__()
         self.padding_idx = padding_idx
@@ -23,7 +23,7 @@ class Language_Model(nn.Module):
         self.proj_to_caption_model = nn.Linear(hidden_size, d_model)
 
         self.pos_emb = nn.Embedding.from_pretrained(sinusoid_encoding_table(max_len + 1, d_model, 0), freeze=True)
-        self.encoder_layer = EncoderLayer()
+        self.encoder_layer = EncoderLayer(config)
         self.proj_to_vocab = nn.Linear(d_model, vocab_size)
 
     def forward(self, input_ids, attention_mask=None, token_type_ids=None, position_ids=None, head_mask=None, inputs_embeds=None,

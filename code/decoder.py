@@ -41,10 +41,10 @@ class Decoder(nn.Module):
         self.fc = nn.Linear(config.DECODER.D_MODEL, len(vocab), bias=False)
 
         # load and froze the language model
-        self.language_model = Language_Model(config.DECODER.LANGUAGE_MODEL)
+        self.language_model = Language_Model(config,config.DECODER.LANGUAGE_MODEL)
 
-        self.register_state('running_mask_self_attention', torch.zeros((1, 1, 0)).byte())
-        self.register_state('running_seq', torch.zeros((1,)).long())
+        # self.register_state('running_mask_self_attention', torch.zeros((1, 1, 0)).byte())
+        # self.register_state('running_seq', torch.zeros((1,)).long())
 
     def forward(self, answer_tokens: torch.Tensor, encoder_features: torch.Tensor, encoder_attention_mask: torch.Tensor):
         b_s, seq_len = answer_tokens.shape
