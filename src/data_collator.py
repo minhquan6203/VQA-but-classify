@@ -36,7 +36,7 @@ class MultimodalCollator:
                     os.path.join(
                         self.config["data"]["dataset_folder"],
                         self.config["data"]["images_folder"], 
-                        "image_"+str(image_id) + ".jpg"
+                        str(image_id).zfill(12) + ".jpg"
                     )
                 ).convert('RGB') for image_id in images
             ],

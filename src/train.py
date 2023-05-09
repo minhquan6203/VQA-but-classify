@@ -34,9 +34,9 @@ def trainMultimodalModelForVQA(config, device, dataset, collator, model, compute
 
     # Load last saved model if exists
     if os.path.exists(training_args.output_dir):
-        checkpoint_folder=max(os.listdir(training_args.output_dir), key=lambda x: int(x.split('-')[1]))
-        model_checkpoint = os.path.join(training_args.output_dir, checkpoint_folder)
-        if os.path.isdir(model_checkpoint):
+        if len(os.listdir(training_args.output_dir)) != 0:
+            checkpoint_folder=max(os.listdir(training_args.output_dir), key=lambda x: int(x.split('-')[1]))
+            model_checkpoint = os.path.join(training_args.output_dir, checkpoint_folder)
             print(f"Continue training at {checkpoint_folder}")
         else:
             model_checkpoint=None

@@ -15,11 +15,11 @@ data:
   images_folder: images
   all_qa_pairs_file: all_qa_pairs.txt
   train_dataset: train.csv
-  val_dataset: val.csv
+  val_dataset: dev.csv
   test_dataset: test.csv
   question_col: question
   image_col: image_id
-  answer_col: answer
+  answer_col: answers
   answer_space: answer_space.txt
 
 tokenizer:
