@@ -6,7 +6,7 @@ import json
 from typing import Text
 import torch
 import transformers
-
+from data_preprocessing import Data_Preroccessing
 from load_data import loadDaquarDataset
 from data_collator import createMultimodalDataCollator
 from model_apply_multi_head_att import createMultimodalModelForVQA
@@ -27,8 +27,12 @@ def main(config_path: Text) -> None:
     else:
         device =  torch.device('cpu')
     
+    preprocessing = Data_Preroccessing(config)
+    preprocessing.convert()
+    logging.info("Finish preprocessing SceneText ViVQA Dataset")
+    
     data = loadDaquarDataset(config)
-    logging.info("Loaded processed DAQUAR Dataset")
+    logging.info("Loaded processed SceneText ViVQA Dataset")
     
     multimodal_collator = createMultimodalDataCollator(config)
     logging.info("Created data collator")

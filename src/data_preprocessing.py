@@ -3,99 +3,94 @@ import pandas as pd
 import pathlib
 from numpy.random import RandomState
 import os
+import shutil
 from PIL import Image
-from sklearn.model_selection import train_test_split 
+from sklearn.model_selection import train_test_split
+from typing import List, Dict, Optional
 
-def preprocess(json_file,folder_output,img_error,path_img):
-    os.makedirs(folder_output, exist_ok=True)
-    path=folder_output
-    # Read data
-    f = open(json_file,encoding='utf-8')
-    data = json.load(f)
+class Data_Preroccessing:
+    def __init__(self, config: Dict):
+      self.json_file_train= config['old_data']['train_dataset']
+      self.json_file_dev= config['old_data']['val_dataset']
+      self.json_file_test= config['old_data']['test_dataset']
+
+      self.new_folder = config['data']['dataset_folder']
+      self.answer_space = config['data']['answer_space']
+      self.all_qa_pairs = config['data']['all_qa_pairs_file']
+      self.images_folder = config['old_data']['images_folder']
+      self.resize = config['old_data']['resize']
+
+    def preprocess(self, json_file, output_folder):
+        os.makedirs(output_folder, exist_ok=True)
+        # Read data
+        f = open(json_file,encoding='utf-8')
+        data = json.load(f)
+        
+        #convert to csv file
+        df_qa = pd.DataFrame.from_dict(data['annotations'])
+
+        for i in range(len(df_qa['image_id'])):
+            df_qa['image_id'][i]=str(df_qa['image_id'][i])
+            df_qa['question'][i]=str(df_qa['question'][i])
+            if len(df_qa['answer'][i])!=0 and df_qa['answer'][i] != 'nan':
+              df_qa['answer'][i]=str(df_qa['answer'][i])
+            else:
+              df_qa['answer'][i]='đéo biết'
     
-    #convert to csv file
-    df_qa = pd.DataFrame.from_dict(data['annotations'])
+        # answer_space.txt
+        with open(os.join(output_folder,'answer_space.txt'), 'a',encoding='utf-8') as f:
+            for i in range(len(df_qa['answer'])):
+              if len(df_qa['answer'][i]) !=0 and df_qa['answer'][i] != 'nan':
+                  f.write(df_qa['answer'][i])
+              else:
+                f.write('đéo biết')
+              f.write('\n')
 
-    for i in range(len(df_qa['image_id'])):
-        df_qa['image_id'][i]=str(df_qa['image_id'][i])
-        df_qa['question'][i]=str(df_qa['question'][i])
-        if len(df_qa['answer'][i])!=0 and df_qa['answer'][i] != 'nan':
-          df_qa['answer'][i]=str(df_qa['answer'][i])
-        else:
-          df_qa['answer'][i]='đéo biết'
-    
+        #all_qa_pairs.txt
+        with open(os.join(output_folder,'all_qa_pairs.txt'), 'a',encoding='utf-8') as f:
+            for i in range(len(df_qa['answer'])):
+              f.write(df_qa['question'][i])
+              f.write('\n')
+              if len(df_qa['answer'][i]) !=0 and df_qa['answer'][i] != 'nan':
+                  f.write(df_qa['answer'][i])
+              else:
+                f.write('đéo biết')
+              f.write('\n')
 
-    for i in range(len(img_error)):
-      img_error[i]=img_error[i].replace('.jpg','')
-    print(img_error)
-    df_qa = df_qa[~df_qa['image_id'].isin(img_error)]
+        df_qa = pd.to_csv(os.path.join(output_folder,json_file.replace('jon','csv')))
 
-    file_img=os.listdir(path_img)
-    for i in range(len(file_img)):
-      file_img[i]=file_img[i].replace('.jpg','')
-    df_qa = df_qa[df_qa['image_id'].isin(file_img)]
+    def move_images(self,input_folder, output_folder):
+      os.makedirs(output_folder,exist_ok=True)
+      for filename in os.listdir(input_folder):
+          shutil.move(os.path.join(input_folder,filename),output_folder)
 
-    df_qa.to_csv(f'{path}/data1.csv',index=False)
-    df_qa=pd.read_csv(f'{path}/data1.csv')
+    def resize_images(self, input_folder, output_folder, size):
+      img_error=[]
 
-    # answer_space.txt
-    p = pathlib.Path(f'{path}/answer_space.txt')
-    p.touch()
-    with open(f'{path}/answer_space.txt', 'w',encoding='utf-8') as f:
-        for i in range(len(df_qa['answer'])):
-          if len(df_qa['answer'][i]) !=0 and df_qa['answer'][i] != 'nan':
-              f.write(df_qa['answer'][i])
-          else:
-            f.write('đéo biết')
-          f.write('\n')
-
-    with open(f'{path}/all_qa_pairs.txt', 'w',encoding='utf-8') as f:
-        for i in range(len(df_qa['answer'])):
-          f.write(df_qa['question'][i])
-          f.write('\n')
-          if len(df_qa['answer'][i]) !=0 and df_qa['answer'][i] != 'nan':
-              f.write(df_qa['answer'][i])
-          else:
-            f.write('đéo biết')
-          f.write('\n')
-
-    #split file for train, validation and test
-    df = pd.read_csv(f'{path}/data1.csv')
-    rng = RandomState()
-    df = pd.read_csv(f'{path}/data1.csv')
-    rng = RandomState()
-    train_val, test = train_test_split(df, test_size=0.1, random_state=rng)
-    train, val = train_test_split(train_val, test_size=0.1111, random_state=rng)
+      os.makedirs(output_folder,exist_ok=True)
+      for filename in os.listdir(input_folder):
+        try:
+          if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+              with Image.open(os.path.join(input_folder, filename)) as im:
+                  if im.mode != "RGB":
+                      im = im.convert("RGB")
+                  im_resized = im.resize(size)
+                  output_filename = os.path.join(output_folder, filename)
+                  im_resized.save(output_filename)
+        except:
+          img_error.append(filename)
+      print(img_error)
 
 
-    train.to_csv(f'{path}/train.csv',index=False)
-    val.to_csv(f'{path}/val.csv',index=False)
-    test.to_csv(f'{path}/test.csv',index=False)
+    def convert(self):
+      if self.resize:
+          size=(self.image_H,self.image_H)
+          self.resize_images(self.images_folder,os.path.join(self.new_folder,'images'),size)
+      else:
+          self.move_images(self.images_folder,os.path.join(self.new_folder,'images'))
+      
+      self.preprocess(self.json_file_train, self.new_folder)
+      self.preprocess(self.json_file_dev, self.new_folder)
+      self.preprocess(self.json_file_test, self.new_folder)
 
-def resize_images(input_folder, output_folder, size):
-    img_error=[]
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-
-    for filename in os.listdir(input_folder):
-      try:
-        if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-            with Image.open(os.path.join(input_folder, filename)) as im:
-                if im.mode != "RGB":
-                    im = im.convert("RGB")
-                im_resized = im.resize(size)
-                output_filename = os.path.join(output_folder, filename)
-                im_resized.save(output_filename)
-      except:
-        img_error.append(filename)
-    
-    return img_error
-
-if __name__ == '__main__':
-
-    img_error=resize_images('./book_fahasa','./data_fahasa/book_fahasa',(512,512))
-    print(img_error)
-
-    json_file = '/content/drive/MyDrive/vivqa_on_book/new_b_all_fahasa_label.json'
-    folder_output = 'data_fahasa'
-    preprocess(json_file, folder_output,img_error,'./data_fahasa/book_fahasa')
+       
