@@ -23,7 +23,7 @@ def setTrainingArgs(config: Dict, device) -> TrainingArguments:
 
 class CustomTrainer(Trainer):
     def compute_loss(self, model, inputs, return_outputs=False):
-        labels = inputs.get("labels")
+        labels = inputs.pop("labels")
         outputs = model(**inputs)
         logits = outputs.get("logits")
         loss = nn.CrossEntropyLoss()(logits, labels)
