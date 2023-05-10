@@ -3,9 +3,9 @@ base:
 
 old_data:
   images_folder: images_total_data
-  train_dataset: train.csv
-  val_dataset:  dev.csv
-  test_dataset: test.csv
+  train_dataset: train.json
+  val_dataset:  dev.json
+  test_dataset: test.json
   resize: False
   image_H: 512
   image_W: 512
