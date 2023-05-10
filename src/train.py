@@ -3,7 +3,6 @@ import shutil
 from typing import Dict
 from transformers import TrainingArguments, Trainer, EarlyStoppingCallback, logging
 import torch
-import torch.nn as nn
 from transformers.optimization import get_scheduler
 
 
@@ -21,16 +20,7 @@ def setTrainingArgs(config: Dict, device) -> TrainingArguments:
 
     return TrainingArguments(**training_args), early_stopping_callback
 
-class CustomTrainer(Trainer):
-    def compute_loss(self, model, inputs, return_outputs=False):
-        labels = inputs.pop("labels")
-        outputs = model(**inputs)
-        logits = outputs.get("logits")
-        loss = nn.CrossEntropyLoss()(logits, labels)
-        if return_outputs:
-            return loss, logits
-        return loss
-  
+
 def trainMultimodalModelForVQA(config, device, dataset, collator, model, compute_metrics):
     training_args, early_stopping_callback = setTrainingArgs(config, device)
     training_args.output_dir = os.path.join(training_args.output_dir, config["model"]["name"])
@@ -53,9 +43,9 @@ def trainMultimodalModelForVQA(config, device, dataset, collator, model, compute
     else:
         model_checkpoint=None
         print("lần đầu làm chuyện ấy")
-    loss_fn = nn.CrossEntropyLoss()
+
     optimizers = (optimizer, scheduler)
-    multi_trainer = CustomTrainer(
+    multi_trainer = Trainer(
         model,
         training_args,
         train_dataset=dataset['train'],
