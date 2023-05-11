@@ -5,9 +5,9 @@ data:
   dataset_folder: data
   images_folder: book_cover_img
   all_qa_pairs_file: all_qa_pairs.txt
-  train_dataset: train.csv
-  val_dataset: val.csv
-  test_dataset: test.csv
+  train_dataset: train.json
+  val_dataset: dev.json
+  test_dataset: test.json
   question_col: question
   image_col: image_id
   answer_col: answer

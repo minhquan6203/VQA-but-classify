@@ -48,22 +48,14 @@ class MultimodalCollator:
             
     def __call__(self, raw_batch_dict):
         return {
-            **self.tokenize_text(
-                raw_batch_dict["annotations"]["question"]
-                if isinstance(raw_batch_dict, dict) else
-                [i["annotations"]["question"] for i in raw_batch_dict]
+            **self.tokenize_text([ann["question"] for raw in raw_batch_dict for ann in raw["annotations"]]
+
             ),
-            **self.preprocess_images(
-                raw_batch_dict["images"]
-                if isinstance(raw_batch_dict, dict) else
-                [i["images"] for i in raw_batch_dict]
-            ),
-            'labels': torch.tensor(
-                raw_batch_dict['label']
-                if isinstance(raw_batch_dict, dict) else
-                [i['label'] for i in raw_batch_dict],
+            **self.preprocess_images([ann["filename"] for raw in raw_batch_dict for ann in raw["images"]]),
+            'labels': torch.tensor([raw_batch_dict['answer_space'].index(ann["answers"][0]) for raw in raw_batch_dict for ann in raw["annotations"]],
                 dtype=torch.int64
             ),
+
         }
 
 def createMultimodalDataCollator(config: Dict) -> MultimodalCollator:

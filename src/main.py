@@ -9,7 +9,7 @@ import transformers
 
 from load_data import loadDaquarDataset
 from data_collator import createMultimodalDataCollator
-from model_generate import createMultimodalModelForVQA
+from model_apply_multi_head_att import createMultimodalModelForVQA
 from train import trainMultimodalModelForVQA
 from evaluate import WuPalmerScoreCalculator
 from utils import countTrainableParameters
