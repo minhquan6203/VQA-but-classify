@@ -36,9 +36,9 @@ class MultimodalCollator:
                     os.path.join(
                         self.config["data"]["dataset_folder"],
                         self.config["data"]["images_folder"], 
-                        "image_"+str(image_id) + ".jpg"
+                        image
                     )
-                ).convert('RGB') for image_id in images
+                ).convert('RGB') for image in images
             ],
             return_tensors="pt",
         )
@@ -49,14 +49,14 @@ class MultimodalCollator:
     def __call__(self, raw_batch_dict):
         return {
             **self.tokenize_text(
-                raw_batch_dict[self.config["data"]["question_col"]]
+                raw_batch_dict["annotations"]["question"]
                 if isinstance(raw_batch_dict, dict) else
-                [i[self.config["data"]["question_col"]] for i in raw_batch_dict]
+                [i["annotations"]["question"] for i in raw_batch_dict]
             ),
             **self.preprocess_images(
-                raw_batch_dict[self.config["data"]["image_col"]]
+                raw_batch_dict["images"]
                 if isinstance(raw_batch_dict, dict) else
-                [i[self.config["data"]["image_col"]] for i in raw_batch_dict]
+                [i["images"] for i in raw_batch_dict]
             ),
             'labels': torch.tensor(
                 raw_batch_dict['label']
@@ -65,7 +65,6 @@ class MultimodalCollator:
                 dtype=torch.int64
             ),
         }
-
 
 def createMultimodalDataCollator(config: Dict) -> MultimodalCollator:
     collator = MultimodalCollator(config)

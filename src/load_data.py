@@ -1,10 +1,10 @@
 import os
-from typing import Dict, Text
+from typing import Dict
 from datasets import load_dataset
 
 def loadDaquarDataset(config: Dict) -> Dict:
     dataset = load_dataset(
-        "csv", 
+        "json", 
         data_files={
             "train": os.path.join(config["data"]["dataset_folder"], config["data"]["train_dataset"]),
             "val": os.path.join(config["data"]["dataset_folder"], config["data"]["val_dataset"]),
@@ -12,15 +12,29 @@ def loadDaquarDataset(config: Dict) -> Dict:
         }
     )
 
+    # answer_space = []
+
+    for data_file in dataset.values():
+        for annotation in data_file:
+            answer = annotation["answers"][0]
+            answer_space.append(answer)
+    # answer_space = list(set(answer_space))  # Remove duplicates and convert to list
+
+    output_file = os.path.join(config["data"]["dataset_folder"], config["data"]["answer_space"])
+
+    with open(output_file, "w") as f:
+        for answer in answer_space:
+            f.write(answer + "\n")
+
     with open(os.path.join(config["data"]["dataset_folder"], config["data"]["answer_space"])) as f:
         answer_space = f.read().splitlines()
 
-    
+
     dataset = dataset.map(
         lambda examples: {
             'label': [
-                answer_space.index(ans.split("\n")[0]) # Select the 1st answer if multiple answers are provided
-                for ans in examples[config["data"]["answer_col"]]
+                answer_space.index(ans.split("\n")[0])  # Select the 1st answer if multiple answers are provided
+                for ans in examples["answers"]
             ]
         },
         batched=True
