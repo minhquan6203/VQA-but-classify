@@ -37,7 +37,7 @@ class Data_Preroccessing:
             if len(df_qa['answers'][i][0])!=0 and df_qa['answers'][i][0] != 'nan':
               df_qa['answers'][i]=str(df_qa['answers'][i][0])
             else:
-              df_qa['answers'][i]='đéo biết'
+              df_qa['answers'][i]='NULL'
     
         # answer_space.txt
         with open(os.path.join(output_folder,'answer_space.txt'), 'a',encoding='utf-8') as f:
@@ -45,7 +45,7 @@ class Data_Preroccessing:
               if len(df_qa['answers'][i][0]) !=0 and df_qa['answers'][i][0] != 'nan':
                   f.write(df_qa['answers'][i])
               else:
-                f.write('đéo biết')
+                f.write('NULL')
               f.write('\n')
 
         #all_qa_pairs.txt
