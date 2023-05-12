@@ -48,11 +48,11 @@ class MultimodalCollator:
             
     def __call__(self, raw_batch_dict):
         return {
-            **self.tokenize_text([ann["question"] for raw in raw_batch_dict for ann in raw["annotations"]]
+            **self.tokenize_text([ann["question"] for ann in raw_batch_dict[0]['annotations'] ]
 
             ),
-            **self.preprocess_images([ann["filename"] for raw in raw_batch_dict for ann in raw["images"]]),
-            'labels': torch.tensor([raw_batch_dict['answer_space'].index(ann["answers"][0]) for raw in raw_batch_dict for ann in raw["annotations"]],
+            **self.preprocess_images([ann["filename"] for ann in raw_batch_dict[0]["images"]]),
+            'labels': torch.tensor([raw_batch_dict[1]['answer_space'].index(ann["answers"][0]) for ann in raw_batch_dict[0]["annotations"]],
                 dtype=torch.int64
             ),
 
