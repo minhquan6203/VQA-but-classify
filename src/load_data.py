@@ -30,6 +30,11 @@ def loadDaquarDataset(config: Dict) -> Dict:
     # with open(os.path.join(config["data"]["dataset_folder"], config["data"]["answer_space"])) as f:
     #     answer_space = f.read().splitlines()
 
+    dataset = dataset.map(
+        lambda examples: {'annotations': [ann for ann in examples['annotations']]},
+        batched=True,
+        batch_size=64,
+    )
     return {
         "dataset": dataset,
         "answer_space": answer_space

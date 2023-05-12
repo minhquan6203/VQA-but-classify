@@ -10,8 +10,9 @@ from transformers import AutoTokenizer, AutoFeatureExtractor
 class MultimodalCollator:
     def __init__(self, config: Dict):
         self.config = config
-        self.tokenizer = AutoTokenizer.from_pretrained(config["model"]["text_encoder"])
-        self.preprocessor = AutoFeatureExtractor.from_pretrained(config["model"]["image_encoder"])
+        self.tokenizer = AutoTokenizer.from_pretrained(config["model"]["text_encoder"]).to(self.device)
+        self.preprocessor = AutoFeatureExtractor.from_pretrained(config["model"]["image_encoder"]).to(self.device)
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     def tokenize_text(self, texts: List[str]):
         encoded_text = self.tokenizer(
