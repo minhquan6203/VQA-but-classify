@@ -10,13 +10,12 @@ from transformers import AutoTokenizer, AutoFeatureExtractor
 class MultimodalCollator:
     def __init__(self, config: Dict):
         self.config = config
-        self.tokenizer = AutoTokenizer.from_pretrained(config["model"]["text_encoder"]).to(self.device)
-        self.preprocessor = AutoFeatureExtractor.from_pretrained(config["model"]["image_encoder"]).to(self.device)
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.tokenizer = AutoTokenizer.from_pretrained(config["model"]["text_encoder"])
+        self.preprocessor = AutoFeatureExtractor.from_pretrained(config["model"]["image_encoder"])
 
     def tokenize_text(self, texts: List[str]):
+        print(len(texts))
         encoded_text = self.tokenizer(
-            text=texts,
             padding=self.config["tokenizer"]["padding"],
             max_length=self.config["tokenizer"]["max_length"],
             truncation=self.config["tokenizer"]["truncation"],
@@ -37,9 +36,9 @@ class MultimodalCollator:
                     os.path.join(
                         self.config["data"]["dataset_folder"],
                         self.config["data"]["images_folder"], 
-                        image
+                        str(image_id).zfill(12) + ".jpg"
                     )
-                ).convert('RGB') for image in images
+                ).convert('RGB') for image_id in images
             ],
             return_tensors="pt",
         )
@@ -48,12 +47,11 @@ class MultimodalCollator:
         }
             
     def __call__(self, raw_batch_dict):
+        print(raw_batch_dict)
         return {
-            **self.tokenize_text([ann["question"] for ann in raw_batch_dict[0]['annotations'] ]
-
-            ),
-            **self.preprocess_images([ann["filename"] for ann in raw_batch_dict[0]["images"]]),
-            'labels': torch.tensor([raw_batch_dict[1]['answer_space'].index(ann["answers"][0]) for ann in raw_batch_dict[0]["annotations"]],
+            **self.tokenize_text([ann["question"] for ann in raw_batch_dict]),
+            **self.preprocess_images([ann["image_id"] for ann in raw_batch_dict]),
+            'labels': torch.tensor([i['label'] for i in raw_batch_dict],
                 dtype=torch.int64
             ),
 
