@@ -27,10 +27,6 @@ def main(config_path: Text) -> None:
     else:
         device =  torch.device('cpu')
     
-    preprocessing = Data_Preroccessing(config)
-    preprocessing.convert()
-    logging.info("Finish preprocessing SceneText ViVQA Dataset")
-    
     data = loadDaquarDataset(config)
     logging.info("Loaded processed SceneText ViVQA Dataset")
     

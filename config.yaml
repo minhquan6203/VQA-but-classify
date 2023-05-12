@@ -1,26 +1,13 @@
 base:
   use_cuda: True
 
-old_data:
-  images_folder: images_total_data
-  train_dataset: train.json
-  val_dataset:  dev.json
-  test_dataset: test.json
-  resize: False
-  image_H: 512
-  image_W: 512
-
 data:
   dataset_folder: data
-  images_folder: images
-  all_qa_pairs_file: all_qa_pairs.txt
-  train_dataset: train.csv
-  val_dataset: dev.csv
-  test_dataset: test.csv
-  question_col: question
-  image_col: image_id
-  answer_col: answers
-  answer_space: answer_space.txt
+  images_folder: images_total_data
+  train_dataset: train.json
+  val_dataset: dev.json
+  test_dataset: test.json
+
 
 tokenizer:
   padding: longest
