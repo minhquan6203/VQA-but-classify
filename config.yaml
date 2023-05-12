@@ -3,7 +3,7 @@ base:
 
 data:
   dataset_folder: data
-  images_folder: book_cover_img
+  images_folder: images_total_data
   all_qa_pairs_file: all_qa_pairs.txt
   train_dataset: train.json
   val_dataset: dev.json
