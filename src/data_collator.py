@@ -14,8 +14,8 @@ class MultimodalCollator:
         self.preprocessor = AutoFeatureExtractor.from_pretrained(config["model"]["image_encoder"])
 
     def tokenize_text(self, texts: List[str]):
-        print(len(texts))
         encoded_text = self.tokenizer(
+            text=texts,
             padding=self.config["tokenizer"]["padding"],
             max_length=self.config["tokenizer"]["max_length"],
             truncation=self.config["tokenizer"]["truncation"],
@@ -47,7 +47,6 @@ class MultimodalCollator:
         }
             
     def __call__(self, raw_batch_dict):
-        print(raw_batch_dict)
         return {
             **self.tokenize_text([ann["question"] for ann in raw_batch_dict]),
             **self.preprocess_images([ann["image_id"] for ann in raw_batch_dict]),
