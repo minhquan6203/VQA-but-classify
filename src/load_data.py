@@ -31,7 +31,7 @@ def loadDaquarDataset(config: Dict) -> Dict:
     #     answer_space = f.read().splitlines()
 
     dataset = dataset.map(
-        lambda examples: {'annotations': [ann for ann in examples['annotations']]},
+        lambda examples: {'images':[img for img in examples['images']],'annotations': [ann for ann in examples['annotations']]},
         batched=True,
         batch_size=64,
     )
