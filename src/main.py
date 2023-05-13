@@ -7,12 +7,12 @@ from typing import Text
 import torch
 import transformers
 
-from load_data import loadDaquarDataset
-from data_collator import createMultimodalDataCollator
-from model_apply_multi_head_att import createMultimodalModelForVQA
-from train import trainMultimodalModelForVQA
-from evaluate import WuPalmerScoreCalculator
-from utils import countTrainableParameters
+from data_utils.load_data import loadDaquarDataset
+from data_utils.data_collator import createMultimodalDataCollator
+from model.model_apply_multi_head_att import createMultimodalModelForVQA
+from task.train import trainMultimodalModelForVQA
+from eval_metric.evaluate import WuPalmerScoreCalculator
+from utils.utils import countTrainableParameters
 
 def main(config_path: Text) -> None:
     transformers.logging.set_verbosity_error()

@@ -91,6 +91,25 @@ def resize_images(input_folder, output_folder, size):
     
     return img_error
 
+def move_images(input_folder, output_folder):
+    img_error=[]
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    for filename in os.listdir(input_folder):
+      try:
+        if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+            with Image.open(os.path.join(input_folder, filename)) as im:
+                if im.mode != "RGB":
+                    im = im.convert("RGB")
+                output_filename = os.path.join(output_folder, filename)
+                im.save(output_filename)
+      except:
+        img_error.append(filename)
+    
+    return img_error
+
+
 if __name__ == '__main__':
 
     img_error=resize_images('./book_fahasa','./data_fahasa/book_fahasa',(512,512))

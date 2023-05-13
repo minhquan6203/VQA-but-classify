@@ -4,14 +4,9 @@ base:
 data:
   dataset_folder: data
   images_folder: images_total_data
-  all_qa_pairs_file: all_qa_pairs.txt
   train_dataset: train.json
   val_dataset: dev.json
   test_dataset: test.json
-  question_col: question
-  image_col: image_id
-  answer_col: answer
-  answer_space: answer_space.txt
 
 tokenizer:
   padding: longest
@@ -20,13 +15,36 @@ tokenizer:
   return_token_type_ids: True
   return_attention_mask: True
 
+text_emmbedding:
+  text_encoder: bert-base-multilingual-uncased
+  d_feature: 768
+  d_model: 512
+  dropout: 0.1
+
+vision_embedding:
+  image_encoder: google/vit-base-patch16-224-in21k
+  d_feature: 768
+  d_model: 512
+  dropout: 0.1
+
+attention:
+  layers: 3
+  heads: 8
+  d_model: 512
+  d_key: 64
+  d_value: 64
+  d_ff: 2048
+  d_feature: 2048
+  dropout: 0.1
+
+encoder:
+  d_model: 512
+  layers: 3
+
 model:
   name: mbert-vit  # Custom name for the multimodal model
-  text_encoder: bert-base-multilingual-uncased # Valid transformer model for text encoding from HuggingFace
-  image_encoder: google/vit-base-patch16-224-in21k  # Valid transformer model for image encoding from HuggingFace
   intermediate_dims: 512
   dropout: 0.3
-  heads: 4
 
 early_stoping:
   early_stopping_patience: 5
