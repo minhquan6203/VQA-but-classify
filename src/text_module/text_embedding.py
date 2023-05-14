@@ -19,11 +19,11 @@ class Text_Embedding(nn.Module):
         self.gelu = nn.GELU()
         self.dropout = nn.Dropout(config["text_embedding"]['dropout'])
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-        self.padding = self.config["tokenizer"]["padding"]
-        self.max_length = self.config["tokenizer"]["max_length"]
-        self.truncation = self.config["tokenizer"]["truncation"]
-        self.return_token_type_ids = self.config["tokenizer"]["return_token_type_ids"],
-        self.return_attention_mask = self.config["tokenizer"]["return_attention_mask"],
+        self.padding = config["tokenizer"]["padding"]
+        self.max_length = config["tokenizer"]["max_length"]
+        self.truncation = config["tokenizer"]["truncation"]
+        self.return_token_type_ids = config["tokenizer"]["return_token_type_ids"],
+        self.return_attention_mask = config["tokenizer"]["return_attention_mask"],
 
     def forward(self, questions: List[str]):
         inputs = self.tokenizer(
