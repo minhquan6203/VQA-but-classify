@@ -4,7 +4,7 @@ import torch.nn as nn
 from text_module.text_embedding import Text_Embedding
 from vision_module.vision_embedding import  Vision_Embedding
 from attention_module.attentions import MultiHeadAtt
-from encoder_module.encoder import CoAtt_Encoder
+from encoder_module.encoder import CoAttentionEncoder
 #lấy ý tưởng từ MCAN
 class MultimodalVQAModel(nn.Module):
     def __init__(self,config: Dict, num_labels: int):
@@ -24,7 +24,7 @@ class MultimodalVQAModel(nn.Module):
             nn.ReLU(),
             nn.Dropout(self.dropout),
         )
-        self.encoder = CoAtt_Encoder(config)
+        self.encoder = CoAttentionEncoder(config)
         self.classifier = nn.Linear(self.intermediate_dims, self.num_labels)
         self.criterion = nn.CrossEntropyLoss()
 
