@@ -8,7 +8,7 @@ from mask.masking import generate_padding_mask
 
 class Text_Embedding(nn.Module):
     def __init__(self, config: Dict):
-        super().__init__()
+        super(Text_Embedding,self).__init__()
         self.tokenizer = AutoTokenizer.from_pretrained(config["text_embedding"]["text_encoder"])
         self.embedding = AutoModel.from_pretrained(config["text_embedding"]["text_encoder"])
         # freeze all parameters of pretrained model
@@ -19,16 +19,21 @@ class Text_Embedding(nn.Module):
         self.gelu = nn.GELU()
         self.dropout = nn.Dropout(config["text_embedding"]['dropout'])
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        self.padding = self.config["tokenizer"]["padding"]
+        self.max_length = self.config["tokenizer"]["max_length"]
+        self.truncation = self.config["tokenizer"]["truncation"]
+        self.return_token_type_ids = self.config["tokenizer"]["return_token_type_ids"],
+        self.return_attention_mask = self.config["tokenizer"]["return_attention_mask"],
 
     def forward(self, questions: List[str]):
         inputs = self.tokenizer(
-            text=questions,
-            padding=self.config["tokenizer"]["padding"],
-            max_length=self.config["tokenizer"]["max_length"],
-            truncation=self.config["tokenizer"]["truncation"],
-            return_tensors='pt',
-            return_token_type_ids=self.config["tokenizer"]["return_token_type_ids"],
-            return_attention_mask=self.config["tokenizer"]["return_attention_mask"],
+            text = questions,
+            padding = self.padding,
+            max_length = self.max_length,
+            truncation = self.truncation,
+            return_tensors = 'pt',
+            return_token_type_ids = self.return_token_type_ids,
+            return_attention_mask = self.return_attention_mask,
         ).to(self.device)
         features = self.embedding(**inputs).last_hidden_state
 
