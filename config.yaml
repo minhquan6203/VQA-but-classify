@@ -36,6 +36,7 @@ attention:
   d_ff: 2048
   d_feature: 2048
   dropout: 0.1
+  use_aoa: False
 
 encoder:
   d_model: 512
