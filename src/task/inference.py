@@ -7,7 +7,7 @@ from PIL import Image
 
 import torch
 import transformers
-from model import MultimodalVQAModel
+from model.model_apply_multi_head_att import MultimodalVQAModel
 
 def loadAnswerSpace(config: Dict) -> List[str]:
     with open(os.path.join(config["data"]["dataset_folder"], config["data"]["answer_space"])) as f:

@@ -8,7 +8,6 @@ data:
   val_dataset: dev.json
   test_dataset: test.json
 
-
 tokenizer:
   padding: longest
   max_length: 64
@@ -16,13 +15,37 @@ tokenizer:
   return_token_type_ids: True
   return_attention_mask: True
 
+text_embedding:
+  text_encoder: bert-base-multilingual-uncased
+  d_features: 768
+  d_model: 512
+  dropout: 0.1
+
+vision_embedding:
+  image_encoder: google/vit-base-patch16-224-in21k
+  d_features: 768
+  d_model: 512
+  dropout: 0.1
+
+attention:
+  layers: 3
+  heads: 8
+  d_model: 512
+  d_key: 64
+  d_value: 64
+  d_ff: 2048
+  d_feature: 2048
+  dropout: 0.1
+  use_aoa: False
+
+encoder:
+  d_model: 512
+  layers: 3
+
 model:
   name: mbert-vit  # Custom name for the multimodal model
-  text_encoder: bert-base-multilingual-uncased # Valid transformer model for text encoding from HuggingFace
-  image_encoder: google/vit-base-patch16-224-in21k  # Valid transformer model for image encoding from HuggingFace
   intermediate_dims: 512
   dropout: 0.3
-  heads: 4
 
 early_stoping:
   early_stopping_patience: 5
