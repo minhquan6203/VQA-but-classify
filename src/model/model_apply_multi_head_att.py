@@ -28,17 +28,10 @@ class MultimodalVQAModel(nn.Module):
         self.classifier = nn.Linear(self.intermediate_dims, self.num_labels)
         self.criterion = nn.CrossEntropyLoss()
 
-    def forward(
-            self,
-            input_ids: torch.LongTensor,
-            pixel_values: torch.FloatTensor,
-            attention_mask: Optional[torch.LongTensor] = None,
-            token_type_ids: Optional[torch.LongTensor] = None,
-            pad_token_id: Optional[torch.LongTensor] = None,
-            labels: Optional[torch.LongTensor] = None):
+    def forward(self,questions: List[str],images: List[str],labels: Optional[torch.LongTensor] = None):
         
-        embbed_text, text_mask= self.text_embbeding(input_ids,attention_mask,token_type_ids,pad_token_id)
-        embbed_vision, vison_mask = self.vision_embbeding(pixel_values)
+        embbed_text, text_mask= self.text_embbeding(questions)
+        embbed_vision, vison_mask = self.vision_embbeding(images)
         attended_text, attended_image = self.encoder(embbed_text, text_mask, embbed_vision, vison_mask)
         fused_output = self.fusion(torch.cat([attended_text, attended_image], dim=1))
         logits = self.classifier(fused_output)
