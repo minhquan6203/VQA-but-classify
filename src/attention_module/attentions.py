@@ -93,12 +93,12 @@ class MultiHeadAtt(nn.Module):
 
 
     def forward(self, queries, keys, values, attention_mask, **kwargs):
-        if self.can_be_stateful and self._is_stateful:
-            self.running_keys = torch.cat([self.running_keys, keys], 1)
-            keys = self.running_keys
+        # if self.can_be_stateful and self._is_stateful:
+        #     self.running_keys = torch.cat([self.running_keys, keys], 1)
+        #     keys = self.running_keys
 
-            self.running_values = torch.cat([self.running_values, values], 1)
-            values = self.running_values
+        #     self.running_values = torch.cat([self.running_values, values], 1)
+        #     values = self.running_values
 
         out, _ = self.attention(queries, keys, values, attention_mask, **kwargs)
         
