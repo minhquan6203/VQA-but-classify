@@ -8,7 +8,7 @@ class Tokenizer(nn.Module):
     def __init__(self, config: Dict):
         super().__init__()
         self.config = config
-        self.tokenizer = AutoTokenizer.from_pretrained(config["text_emmbedding"]["text_encoder"])
+        self.tokenizer = AutoTokenizer.from_pretrained(config["text_embedding"]["text_encoder"])
     def tokenize_text(self, texts: List[str]):
         encoded_text = self.tokenizer(
             text=texts,

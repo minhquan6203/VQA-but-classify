@@ -9,14 +9,14 @@ from mask.masking import generate_padding_mask
 class Text_Embedding(nn.Module):
     def __init__(self, config: Dict):
         super().__init__()
-        self.embedding = AutoModel.from_pretrained(config["text_emmbedding"]["text_encoder"])
+        self.embedding = AutoModel.from_pretrained(config["text_embedding"]["text_encoder"])
         # freeze all parameters of pretrained model
         for param in self.embedding.parameters():
             param.requires_grad = False
 
-        self.proj = nn.Linear(config["text_emmbedding"]['d_feature'], config["text_emmbedding"]['d_model'])
+        self.proj = nn.Linear(config["text_embedding"]['d_features'], config["text_embedding"]['d_model'])
         self.gelu = nn.GELU()
-        self.dropout = nn.Dropout(config["text_emmbedding"]['dropout'])
+        self.dropout = nn.Dropout(config["text_embedding"]['dropout'])
 
     def forward(self, input_ids, attention_mask, token_type_ids, pad_token_id):
         

@@ -15,15 +15,15 @@ tokenizer:
   return_token_type_ids: True
   return_attention_mask: True
 
-text_emmbedding:
+text_embedding:
   text_encoder: bert-base-multilingual-uncased
-  d_feature: 768
+  d_features: 768
   d_model: 512
   dropout: 0.1
 
 vision_embedding:
   image_encoder: google/vit-base-patch16-224-in21k
-  d_feature: 768
+  d_features: 768
   d_model: 512
   dropout: 0.1
 

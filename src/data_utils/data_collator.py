@@ -4,8 +4,8 @@ from typing import Dict, List
 from PIL import Image
 
 import torch
-from module_vision.vision_preprocess import Processcer
-from module_text.text_tokenizer import Tokenizer
+from vision_module.vision_preprocess import Processcer
+from text_module.text_tokenizer import Tokenizer
 
 @dataclass
 class MultimodalCollator:

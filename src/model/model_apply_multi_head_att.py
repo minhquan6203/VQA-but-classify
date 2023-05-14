@@ -1,8 +1,8 @@
 from typing import List, Dict, Optional
 import torch
 import torch.nn as nn
-from text_module.text_embbeding import Text_Embedding
-from vision_module.vision_embbeding import  Vision_Embedding
+from text_module.text_embedding import Text_Embedding
+from vision_module.vision_embedding import  Vision_Embedding
 from attention_module.attentions import MultiHeadAtt
 from encoder_module.encoder import CoAtt_Encoder
 #lấy ý tưởng từ MCAN
@@ -13,9 +13,9 @@ class MultimodalVQAModel(nn.Module):
         self.num_labels = num_labels
         self.intermediate_dims = config["model"]["intermediate_dims"]
         self.dropout=config["model"]["dropout"]
-        self.num_attention_heads=config["model"]['heads']
-        self.d_text = config["text_emmbedding"]['d_features']
-        self.d_vision = config["vision_emmbedding"]['d_features']
+        self.num_attention_heads=config["attention"]['heads']
+        self.d_text = config["text_embedding"]['d_features']
+        self.d_vision = config["vision_embedding"]['d_features']
         self.text_embbeding = Text_Embedding(config)
         self.vision_embbeding = Vision_Embedding(config)
         self.matt = MultiHeadAtt(config)
