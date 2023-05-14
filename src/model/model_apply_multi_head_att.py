@@ -21,11 +21,13 @@ class MultimodalVQAModel(nn.Module):
         self.vision_embbeding = Vision_Embedding(config)
         self.matt = MultiHeadAtt(config)
         self.fusion = nn.Sequential(
+            nn.Linear(self.intermediate_dims +self.intermediate_dims, self.intermediate_dims),
             nn.ReLU(),
             nn.Dropout(self.dropout),
         )
         self.encoder = CoAttentionEncoder(config)
         self.classifier = nn.Linear(self.intermediate_dims, self.num_labels)
+        self.attention_weights = nn.Linear(self.intermediate_dims, 1)
         self.criterion = nn.CrossEntropyLoss()
 
     def forward(self, questions: List[str], images: List[str], labels: Optional[torch.LongTensor] = None):
@@ -33,8 +35,8 @@ class MultimodalVQAModel(nn.Module):
         embbed_vision, vison_mask = self.vision_embbeding(images)
         encoded_text, encoded_image = self.encoder(embbed_text, text_mask, embbed_vision, vison_mask)
         
-        text_attended = self.attention_weights(torch.tanh(text_attended))
-        image_attended = self.attention_weights(torch.tanh(image_attended))
+        text_attended = self.attention_weights(torch.tanh(encoded_text))
+        image_attended = self.attention_weights(torch.tanh(encoded_image))
         attention_weights = torch.softmax(torch.cat([text_attended, image_attended], dim=1), dim=1)
         attended_text = torch.sum(attention_weights[:, 0].unsqueeze(-1) * encoded_text, dim=1)
         attended_image = torch.sum(attention_weights[:, 1].unsqueeze(-1) * encoded_image, dim=1)
@@ -46,8 +48,8 @@ class MultimodalVQAModel(nn.Module):
             "logits": logits
         }
         if labels is not None:
-            logits=logits.view(-1,self.num_labels)
-            labels = labels.view(-1)
+            # logits=logits.view(-1,self.num_labels)
+            # labels = labels.view(-1)
             loss = self.criterion(logits, labels)
             out["loss"] = loss
         
