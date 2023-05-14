@@ -1,7 +1,7 @@
 import os
 import shutil
-import logging
 from typing import Dict
+import transformers
 from transformers import TrainingArguments, Trainer, EarlyStoppingCallback, logging
 import torch
 from transformers.optimization import get_scheduler
@@ -38,12 +38,12 @@ def trainMultimodalModelForVQA(config, device, dataset, collator, model, compute
         if len(os.listdir(training_args.output_dir)) != 0:
             checkpoint_folder=max(os.listdir(training_args.output_dir), key=lambda x: int(x.split('-')[1]))
             model_checkpoint = os.path.join(training_args.output_dir, checkpoint_folder)
-            logging.info(f"continue training at {checkpoint_folder}")
+            print(f"continue training at {checkpoint_folder}")
         else:
             model_checkpoint=None
     else:
         model_checkpoint=None
-        logging.info("frist time training")
+        print("frist time training")
 
     optimizers = (optimizer, scheduler)
     multi_trainer = Trainer(
