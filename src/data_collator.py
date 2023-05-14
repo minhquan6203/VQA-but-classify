@@ -23,7 +23,7 @@ class MultimodalCollator:
             return_tensors='pt',
             return_token_type_ids=self.config["tokenizer"]["return_token_type_ids"],
             return_attention_mask=self.config["tokenizer"]["return_attention_mask"],
-        ).to(self.device)
+        )
         return {
             "input_ids": encoded_text['input_ids'].squeeze(),
             "token_type_ids": encoded_text['token_type_ids'].squeeze(),
@@ -42,7 +42,7 @@ class MultimodalCollator:
                 ).convert('RGB') for image_id in images
             ],
             return_tensors="pt",
-        ).to(self.device)
+        )
         return {
             "pixel_values": processed_images['pixel_values'].squeeze(),
         }
