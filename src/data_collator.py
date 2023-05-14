@@ -12,6 +12,7 @@ class MultimodalCollator:
         self.config = config
         self.tokenizer = AutoTokenizer.from_pretrained(config["model"]["text_encoder"])
         self.preprocessor = AutoFeatureExtractor.from_pretrained(config["model"]["image_encoder"])
+        self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
     def tokenize_text(self, texts: List[str]):
         encoded_text = self.tokenizer(
@@ -22,7 +23,7 @@ class MultimodalCollator:
             return_tensors='pt',
             return_token_type_ids=self.config["tokenizer"]["return_token_type_ids"],
             return_attention_mask=self.config["tokenizer"]["return_attention_mask"],
-        )
+        ).to(self.device)
         return {
             "input_ids": encoded_text['input_ids'].squeeze(),
             "token_type_ids": encoded_text['token_type_ids'].squeeze(),
@@ -41,7 +42,7 @@ class MultimodalCollator:
                 ).convert('RGB') for image_id in images
             ],
             return_tensors="pt",
-        )
+        ).to(self.device)
         return {
             "pixel_values": processed_images['pixel_values'].squeeze(),
         }
