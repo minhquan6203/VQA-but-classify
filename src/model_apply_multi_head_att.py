@@ -22,12 +22,12 @@ class MultimodalVQAModel(nn.Module):
         self.text_encoder = AutoModel.from_pretrained(
             self.pretrained_text_name,
         )
-        for param in self.text_encoder():
+        for param in self.text_encoder.parameters():
             param.requires_grad = False
         self.image_encoder = AutoModel.from_pretrained(
             self.pretrained_image_name,
         )
-        for param in self.image_encoder():
+        for param in self.image_encoder.parameters():
             param.requires_grad = False        
         self.text_attention = nn.Linear(self.text_encoder.config.hidden_size, self.intermediate_dims)
         self.image_attention = nn.Linear(self.image_encoder.config.hidden_size, self.intermediate_dims)
