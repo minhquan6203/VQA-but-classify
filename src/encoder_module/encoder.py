@@ -24,19 +24,19 @@ class CoAtt_Encoder(nn.Module):
 
         self.pos_embedding = SinusoidPositionalEmbedding(config["encoder"]['d_model'])
         self.layer_norm = nn.LayerNorm(config["encoder"]['d_model'])
-        self.matt = MultiHeadAtt(config)
+        self.encoder_layer = EncoderLayer(config)
         self.attention_weights = nn.Linear(config["encoder"]['d_model'], 1)  # Khai báo lớp nn.Linear cho attention_weights
 
     def forward(self,text_feature, text_mask, image_feature, image_mask):
-        image_feature = self.layer_norm(image_feature) + self.pos_embedding(image_feature)
-        text_feature = self.layer_norm(text_feature) + self.pos_embedding(text_feature)
+        image_feature = self.layer_norm(image_feature)
+        text_feature = self.layer_norm(text_feature)
         # Multi-Head Attention
-        text_attended = self.matt(text_feature, text_feature, text_feature, text_mask)
-        image_attended = self.matt(image_feature, image_feature, image_feature, image_mask)
+        text_attended = self.encoder_layer(text_feature, text_feature, text_feature, text_mask)
+        image_attended = self.encoder_layer(image_feature, image_feature, image_feature, image_mask)
 
         # Cross attention
-        text_attended = self.matt(text_attended, image_attended, image_attended, image_mask)
-        image_attended = self.matt(image_attended, text_attended, text_attended, text_mask)
+        text_attended = self.encoder_layer(text_attended, image_attended, image_attended, image_mask)
+        image_attended = self.encoder_layer(image_attended, text_attended, text_attended, text_mask)
 
         # Co-attention
         text_attended = self.attention_weights(torch.tanh(text_attended))
