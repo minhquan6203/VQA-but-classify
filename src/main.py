@@ -28,7 +28,7 @@ def main(config_path: Text) -> None:
         device =  torch.device('cpu')
     
     data = loadDaquarDataset(config)
-    logging.info("Loaded processed DAQUAR Dataset")
+    logging.info("Loaded processed Scene Text ViVQA Dataset")
     
     multimodal_collator = createMultimodalDataCollator(config)
     logging.info("Created data collator")
