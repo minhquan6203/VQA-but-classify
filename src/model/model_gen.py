@@ -30,20 +30,16 @@ class MultimodalVQAModel(nn.Module):
             nn.Dropout(self.dropout),
         )
         self.encoder = CoAttentionEncoder(config)
-        self.classifier = nn.Linear(self.intermediate_dims, self.num_labels)
+        self.linear = nn.Linear(self.intermediate_dims, 768)
         self.attention_weights = nn.Linear(self.intermediate_dims, 1)
         self.criterion = nn.CrossEntropyLoss()
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
     def forward(self, questions: List[str], images: List[str], labels: Optional[torch.LongTensor] = None):
         answers = [self.answer_space[label] for label in labels]
-        answers = self.tokenizer(answers,return_tensors="pt",padding=True, truncation=True).to(self.device)
-        answers_ids = answers['input_ids']
-        answers_mask = answers['attention_mask']
         embbed_text, text_mask= self.text_embbeding(questions)
         embbed_vision, vison_mask = self.vision_embbeding(images)
         encoded_text, encoded_image = self.encoder(embbed_text, text_mask, embbed_vision, vison_mask)
-        
         # text_attended = self.attention_weights(torch.tanh(encoded_text))
         # image_attended = self.attention_weights(torch.tanh(encoded_image))
         # attention_weights = torch.softmax(torch.cat([text_attended, image_attended], dim=1), dim=1)
@@ -51,9 +47,12 @@ class MultimodalVQAModel(nn.Module):
         # attended_image = torch.sum(attention_weights[:, 1].unsqueeze(-1) * encoded_image, dim=1)
         
         fused_output = self.fusion(torch.cat([encoded_text, encoded_image], dim=1))
+        fused_output = self.linear(fused_output)
+        answers = self.tokenizer.batch_encode_plus(answers,padding='max_length',truncation=True,max_length=fused_output.shape[1],return_tensors='pt').to(self.device)
+        answers_ids = answers['input_ids']
+        answers_mask = answers['attention_mask']
         fused_mask = self.fusion(torch.cat([text_mask.squeeze(1).squeeze(1),vison_mask.squeeze(1).squeeze(1)],dim=1))
-        
-        logits, loss = self.decoder(answers_ids, fused_output, fused_mask)
+        logits,loss = self.decoder(answers_ids, fused_output, fused_mask)
         out = {
             "logits": logits,
             "loss": loss
