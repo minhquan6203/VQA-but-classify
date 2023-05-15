@@ -26,7 +26,6 @@ class MultimodalVQAModel(nn.Module):
         self.tokenizer = AutoTokenizer.from_pretrained(config["text_embedding"]["text_encoder"])
         self.decoder = Decoder(config)
         self.fusion = nn.Sequential(
-            nn.Linear(self.intermediate_dims +self.intermediate_dims, self.intermediate_dims),
             nn.ReLU(),
             nn.Dropout(self.dropout),
         )
@@ -34,10 +33,13 @@ class MultimodalVQAModel(nn.Module):
         self.classifier = nn.Linear(self.intermediate_dims, self.num_labels)
         self.attention_weights = nn.Linear(self.intermediate_dims, 1)
         self.criterion = nn.CrossEntropyLoss()
+        self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
     def forward(self, questions: List[str], images: List[str], labels: Optional[torch.LongTensor] = None):
         answers = [self.answer_space[label] for label in labels]
-        answers = self.tokenizer(answers)['input_ids']
+        answers = self.tokenizer(answers,return_tensors="pt",padding=True, truncation=True).to(self.device)
+        answers_ids = answers['input_ids']
+        answers_mask = answers['attention_mask']
         embbed_text, text_mask= self.text_embbeding(questions)
         embbed_vision, vison_mask = self.vision_embbeding(images)
         encoded_text, encoded_image = self.encoder(embbed_text, text_mask, embbed_vision, vison_mask)
@@ -49,17 +51,14 @@ class MultimodalVQAModel(nn.Module):
         # attended_image = torch.sum(attention_weights[:, 1].unsqueeze(-1) * encoded_image, dim=1)
         
         fused_output = self.fusion(torch.cat([encoded_text, encoded_image], dim=1))
-        fused_mask = self.fusion(torch.cat([text_mask,vison_mask],dim=1))
-        logits = self.decoder(questions,answers,fused_output,fused_mask)
-        logits = F.log_softmax(logits, dim=-1)
+        fused_mask = self.fusion(torch.cat([text_mask.squeeze(1).squeeze(1),vison_mask.squeeze(1).squeeze(1)],dim=1))
+        
+        logits, loss = self.decoder(answers_ids, fused_output, fused_mask)
         out = {
-            "logits": logits
+            "logits": logits,
+            "loss": loss
         }
-        if answers is not None:
-            logits=logits.view(-1,105879)
-            labels = labels.view(-1)
-            loss = self.criterion(logits, answers)
-            out["loss"] = loss     
+     
         return out
 
 def createMultimodalModelForVQA(config: Dict, answer_space: List[str]) -> MultimodalVQAModel:

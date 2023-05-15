@@ -36,9 +36,8 @@ class Decoder(nn.Module):
         self.gen = BertGenerationDecoder.from_pretrained(config['decoder']['text_decoder'])
 
   
-    def forward(self,question: List[str], answer_tokens: torch.Tensor, encoder_features: torch.Tensor, encoder_attention_mask: torch.Tensor):
-        question_token = self.tokenizer(question)
-        fused_input = torch.cat([question_token['input_ids'],encoder_features.unsqueeze(0)],dim=1)
-        out = self.gen(input_ids=fused_input,attention_mask=encoder_attention_mask,labels=answer_tokens)
+    def forward(self, answer_tokens: torch.Tensor, encoder_features: torch.Tensor, encoder_attention_mask: torch.Tensor):
+
+        out = self.gen(inputs_embeds=encoder_features,attention_mask=encoder_attention_mask,labels=answer_tokens)
         
-        return out.logits
+        return out.logits, out.loss
