@@ -42,6 +42,12 @@ encoder:
   d_model: 512
   layers: 3
 
+decoder:
+  text_decoder: bert-base-multilingual-uncased
+  d_model: 512
+  layers: 3
+  max_len: 64
+
 model:
   name: mbert-vit  # Custom name for the multimodal model
   intermediate_dims: 512
