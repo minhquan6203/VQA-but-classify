@@ -50,6 +50,7 @@ decoder:
 
 model:
   name: mbert-vit  # Custom name for the multimodal model
+  type_model: "gen"
   intermediate_dims: 512
   dropout: 0.3
 

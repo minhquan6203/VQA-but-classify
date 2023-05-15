@@ -9,6 +9,8 @@ class Decoder(nn.Module):
     def __init__(self, config):
         super(Decoder, self).__init__()
         self.gen = BertGenerationDecoder.from_pretrained(config['decoder']['text_decoder'])
+        # for param in self.gen.parameters():
+        #     param.requires_grad = False
 
     def forward(self, answer_tokens: torch.Tensor, encoder_features: torch.Tensor, encoder_attention_mask: torch.Tensor):
         out = self.gen(inputs_embeds=encoder_features,attention_mask=encoder_attention_mask,labels=answer_tokens)

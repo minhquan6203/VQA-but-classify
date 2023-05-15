@@ -40,6 +40,7 @@ def trainMultimodalModelForVQA(config, device, dataset, collator, model, compute
             print(f"continue training at {checkpoint_folder}")
         else:
             model_checkpoint=None
+            print("frist time training")
     else:
         model_checkpoint=None
         print("frist time training")
