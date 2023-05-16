@@ -87,7 +87,6 @@ import numpy as np
 from sklearn.metrics import accuracy_score, f1_score
 from nltk.corpus import wordnet
 from transformers import  AutoModel, AutoTokenizer
-from text_module.tokenizer import Text_Tokenizer
 import torch
 
 
@@ -161,13 +160,11 @@ class WuPalmerScoreCalculator:
 
     def accuracy(self,labels: np.ndarray, preds: List[str]) -> float:
         labels =[self.answer_space[label] for label in labels]
-        predicts = [pred[0] for pred in preds]
-        return accuracy_score(labels,predicts)
+        return accuracy_score(labels,preds)
     
     def f1(self,labels: np.ndarray, preds: List[str]) -> float:
         labels =[self.answer_space[label] for label in labels]
-        predicts = [pred[0] for pred in preds]
-        return f1_score(labels,predicts, average='macro')
+        return f1_score(labels,preds, average='macro')
 
     def compute_metrics(self, eval_tuple: Tuple[np.ndarray, np.ndarray]) -> Dict[str, float]:
         logits, labels = eval_tuple
