@@ -36,7 +36,7 @@ def main(config_path: Text) -> None:
     multimodal_model = createMultimodalModelForVQA(config, data["answer_space"]).to(device)
     logging.info("Initialized multimodal model for VQA")
     
-    wups_calculator = WuPalmerScoreCalculator(data["answer_space"])
+    wups_calculator = WuPalmerScoreCalculator(config, data["answer_space"])
 
     
     logging.info("Training started...")
