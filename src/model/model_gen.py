@@ -26,11 +26,11 @@ class MultimodalVQAModel(nn.Module):
         self.tokenizer = AutoTokenizer.from_pretrained(config["text_embedding"]["text_encoder"])
         self.decoder = Decoder(config)
         self.fusion = nn.Sequential(
+            nn.Linear(self.intermediate_dims+self.intermediate_dims,768),
             nn.ReLU(),
             nn.Dropout(self.dropout),
         )
         self.encoder = CoAttentionEncoder(config)
-        self.linear = nn.Linear(self.intermediate_dims, 768)
         self.attention_weights = nn.Linear(self.intermediate_dims, 1)
         self.criterion = nn.CrossEntropyLoss()
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -47,7 +47,6 @@ class MultimodalVQAModel(nn.Module):
         # attended_image = torch.sum(attention_weights[:, 1].unsqueeze(-1) * encoded_image, dim=1)
         
         fused_output = self.fusion(torch.cat([encoded_text, encoded_image], dim=1))
-        fused_output = self.linear(fused_output)
         answers = self.tokenizer.batch_encode_plus(answers,padding='max_length',truncation=True,max_length=fused_output.shape[1],return_tensors='pt').to(self.device)
         answers_ids = answers['input_ids']
         answers_mask = answers['attention_mask']
