@@ -94,7 +94,7 @@ import torch
 class WuPalmerScoreCalculator:
     def __init__(self,config: Dict, answer_space: List[str]):
         self.answer_space = answer_space
-        self.tokenizer = Text_Tokenizer(config)
+        self.tokenizer = AutoTokenizer.from_pretrained('bert-base-multilingual-uncased')
     def wup_measure(self, a: str, b: str, similarity_threshold: float = 0.925):
         """
         Returns Wu-Palmer similarity score.
