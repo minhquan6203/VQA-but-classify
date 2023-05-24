@@ -6,7 +6,7 @@ from text_module.text_embedding import Text_Embedding
 from vision_module.vision_embedding import  Vision_Embedding
 from attention_module.attentions import MultiHeadAtt
 from encoder_module.encoder import CoAttentionEncoder
-#lấy ý tưởng từ MCAN
+
 class MultimodalVQAModel(nn.Module):
     def __init__(self,config: Dict, num_labels: int):
      
