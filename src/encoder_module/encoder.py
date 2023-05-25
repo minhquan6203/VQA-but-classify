@@ -112,7 +112,7 @@ class GuidedAttentionEncoder(nn.Module):
     def forward(self, vision_features: torch.Tensor, vision_padding_mask: torch.Tensor, 
                 language_features: torch.Tensor, language_padding_mask: torch.Tensor):
         vision_features = self.layer_norm(vision_features) + self.pos_embedding(vision_features)
-        language_features = self.language_layer_norm(language_features) + self.pos_embedding(language_features)
+        language_features = self.layer_norm(language_features) + self.pos_embedding(language_features)
 
         for layer in zip(self.guided_attn_layers,self.language_self_attn_layers):
             guided_attn_layer,language_self_attn_layers=layer
