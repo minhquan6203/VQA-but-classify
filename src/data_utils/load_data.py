@@ -8,7 +8,7 @@ def loadDataset(config: Dict) -> Dict:
         data_files={
             "train": os.path.join(config["data"]["dataset_folder"], config["data"]["train_dataset"]),
             "val": os.path.join(config["data"]["dataset_folder"], config["data"]["val_dataset"]),
-            # "test": os.path.join(config["data"]["dataset_folder"], config["data"]["test_dataset"])
+            "test": os.path.join(config["data"]["dataset_folder"], config["data"]["test_dataset"])
         },field='annotations'
     )
 
