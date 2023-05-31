@@ -3,7 +3,7 @@ base:
 
 data:
   dataset_folder: data
-  images_folder: images_total_data
+  images_folder: train
   train_dataset: train.json
   val_dataset: dev.json
   test_dataset: test.json
@@ -66,8 +66,8 @@ train:
   save_strategy: epoch
   save_total_limit: 2 
   metric_for_best_model: accuracy
-  per_device_train_batch_size: 64
-  per_device_eval_batch_size: 64
+  per_device_train_batch_size: 256
+  per_device_eval_batch_size: 256
   remove_unused_columns: False
   dataloader_num_workers: 2
   load_best_model_at_end: True
@@ -80,3 +80,4 @@ metrics:
 inference:
   checkpoint: checkpoint-3
   test_dataset: data/test.json
+  batch_size: 256
