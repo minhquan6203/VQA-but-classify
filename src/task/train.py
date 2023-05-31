@@ -22,7 +22,7 @@ def setTrainingArgs(config: Dict, device) -> TrainingArguments:
     return TrainingArguments(**training_args), early_stopping_callback
 
 
-def trainMultimodalModelForVQA(config, device, dataset, collator, model, compute_metrics):
+def train_model(config, device, dataset, collator, model, compute_metrics):
     training_args, early_stopping_callback = setTrainingArgs(config, device)
     training_args.output_dir = os.path.join(training_args.output_dir, config["model"]["name"])
     optimizer = torch.optim.AdamW(model.parameters(), lr=training_args.learning_rate)

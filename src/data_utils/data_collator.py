@@ -18,6 +18,6 @@ class MultimodalCollator:
 
         }
 
-def createMultimodalDataCollator(config: Dict) -> MultimodalCollator:
+def createDataCollator(config: Dict) -> MultimodalCollator:
     collator = MultimodalCollator(config)
     return collator

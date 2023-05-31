@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.metrics import accuracy_score, f1_score
 from nltk.corpus import wordnet
 
-class WuPalmerScoreCalculator:
+class ScoreCalculator:
     def __init__(self, answer_space: List[str]):
         self.answer_space = answer_space
 
