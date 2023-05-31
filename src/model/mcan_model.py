@@ -7,10 +7,10 @@ from vision_module.vision_embedding import  Vision_Embedding
 from attention_module.attentions import MultiHeadAtt
 from encoder_module.encoder import GuidedAttentionEncoder
 #lấy ý tưởng từ MCAN
-class MultimodalVQAModel(nn.Module):
+class MCAN_Model(nn.Module):
     def __init__(self,config: Dict, num_labels: int):
      
-        super(MultimodalVQAModel, self).__init__()
+        super(MCAN_Model, self).__init__()
         self.num_labels = num_labels
         self.intermediate_dims = config["model"]["intermediate_dims"]
         self.dropout=config["model"]["dropout"]
@@ -56,6 +56,6 @@ class MultimodalVQAModel(nn.Module):
         return out
 
 
-def createMultimodalModelForVQA(config: Dict, answer_space: List[str]) -> MultimodalVQAModel:
-    model = MultimodalVQAModel(config, num_labels=len(answer_space))
+def createMCAN_Model(config: Dict, answer_space: List[str]) -> MCAN_Model:
+    model = MCAN_Model(config, num_labels=len(answer_space))
     return model

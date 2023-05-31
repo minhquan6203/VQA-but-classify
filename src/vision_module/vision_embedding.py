@@ -13,8 +13,9 @@ class Vision_Embedding(nn.Module):
         self.backbone = AutoModel.from_pretrained(config["vision_embedding"]["image_encoder"])
         self.preprocessor = AutoFeatureExtractor.from_pretrained(config["vision_embedding"]["image_encoder"])
         # freeze all parameters of pretrained model
-        for param in self.backbone.parameters():
-            param.requires_grad = False
+        if config["vision_embedding"]["freeze"]:
+            for param in self.backbone.parameters():
+                param.requires_grad = False
             
         self.proj = nn.Linear(config["vision_embedding"]['d_features'], config["vision_embedding"]['d_model'])
         self.gelu = nn.GELU()

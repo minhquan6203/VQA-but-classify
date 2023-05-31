@@ -17,12 +17,14 @@ tokenizer:
 
 text_embedding:
   text_encoder: bert-base-multilingual-uncased
+  freeze: True
   d_features: 768
   d_model: 512
   dropout: 0.1
 
 vision_embedding:
   image_encoder: google/vit-base-patch16-224-in21k
+  freeze: True
   d_features: 768
   d_model: 512
   dropout: 0.1
@@ -44,6 +46,7 @@ encoder:
 
 model:
   name: mbert-vit  # Custom name for the multimodal model
+  type_model: mcan
   intermediate_dims: 512
   dropout: 0.3
 
@@ -76,3 +79,4 @@ metrics:
 
 inference:
   checkpoint: checkpoint-3
+  test_dataset: data/test.json
