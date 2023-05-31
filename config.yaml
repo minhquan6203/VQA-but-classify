@@ -16,7 +16,7 @@ tokenizer:
   return_attention_mask: True
 
 text_embedding:
-  text_encoder: bert-base-multilingual-uncased
+  text_encoder: vinai/phobert-base
   freeze: True
   d_features: 768
   d_model: 512
@@ -45,7 +45,7 @@ encoder:
   layers: 3
 
 model:
-  name: mbert-vit  # Custom name for the multimodal model
+  name: phobert-vit  # Custom name for the multimodal model
   type_model: mcan
   intermediate_dims: 512
   dropout: 0.3
