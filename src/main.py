@@ -64,7 +64,7 @@ def main(config_path: Text) -> None:
     else:
         device =  torch.device('cpu')
     data = loadDataset(config)
-    logging.info("Loaded processed sentiment Dataset")
+    logging.info("Loaded processed VQA Dataset")
     
     training(config,device,data) #predict thì cmt lại, vào sửa config tới best model
 
