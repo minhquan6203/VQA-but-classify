@@ -39,7 +39,7 @@ class Predict:
         self.model.eval()
         with torch.no_grad():
             for item in test_set:
-                output = self.model(item['question'],item['image_id'])
+                output = self.model(item['question'],item['image_id'].tolist())
                 preds = output["logits"].argmax(axis=-1).cpu().numpy()
                 answers = [self.answer_space[i] for i in preds]
                 y_preds.extend(answers)
@@ -51,8 +51,8 @@ class Predict:
         df = pd.DataFrame(data)
         df.to_csv('./submission.csv', index=False)
 
-    def load_annotations(self, json_file) -> List[Dict]:
-        with open(os.path.join(self.data_folder,json_file)) as f:
+    def load_annotations(self,json_file) -> List[Dict]:
+        with open(os.path.join(json_file)) as f:
             json_data =json.load(f)
         annotations = []
         for ann in json_data["annotations"]:
