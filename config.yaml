@@ -9,8 +9,8 @@ data:
   test_dataset: test.json
 
 tokenizer:
-  padding: longest
-  max_length: 64
+  padding: max_length
+  max_length: 20
   truncation: True
   return_token_type_ids: True
   return_attention_mask: True
