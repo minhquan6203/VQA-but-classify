@@ -14,7 +14,7 @@ def setTrainingArgs(config: Dict, device) -> TrainingArguments:
 
     # Add early stopping callback
     training_args["load_best_model_at_end"] = True
-    training_args["metric_for_best_model"] = "eval_accuracy"
+    # training_args["metric_for_best_model"] = "eval_accuracy"
     training_args["greater_is_better"] = True
     early_stopping_patience = config["early_stoping"]["early_stopping_patience"]
     early_stopping_callback = EarlyStoppingCallback(early_stopping_patience)
