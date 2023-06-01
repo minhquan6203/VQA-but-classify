@@ -65,7 +65,7 @@ train:
   logging_strategy: epoch
   save_strategy: epoch
   save_total_limit: 2 
-  metric_for_best_model: accuracy
+  metric_for_best_model: eval_accuracy
   per_device_train_batch_size: 256
   per_device_eval_batch_size: 256
   remove_unused_columns: False
