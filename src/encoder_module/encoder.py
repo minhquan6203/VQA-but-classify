@@ -107,7 +107,7 @@ class GuidedAttentionEncoder(nn.Module):
         self.d_model = config["encoder"]['d_model']
 
         self.guided_attn_layers = nn.ModuleList([GuidedEncoderLayer(config) for _ in range(config["encoder"]['layers'])])
-        self.language_self_attn_layers = nn.ModuleList([EncoderLayer(config) for _ in range(config["encoder"]['layers'])])
+        self.language_self_attn_layers = nn.ModuleList([GuidedEncoderLayer(config) for _ in range(config["encoder"]['layers'])])
 
     def forward(self, vision_features: torch.Tensor, vision_padding_mask: torch.Tensor, 
                 language_features: torch.Tensor, language_padding_mask: torch.Tensor):

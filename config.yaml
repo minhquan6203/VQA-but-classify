@@ -46,7 +46,7 @@ encoder:
 
 model:
   name: phobert-vit  # Custom name for the multimodal model
-  type_model: mcan
+  type_model: vilbert
   intermediate_dims: 512
   dropout: 0.1
 
