@@ -125,9 +125,10 @@ class GuidedAttentionEncoder(nn.Module):
             )
             language_features=language_self_attn_layers(
                 queries=language_features,
-                keys=language_features,
-                values=language_features,
-                attention_mask=language_padding_mask
+                keys=vision_features,
+                values=vision_features,
+                self_attention_mask=language_padding_mask,
+                guided_attention_mask=vision_padding_mask
             )
         
 
