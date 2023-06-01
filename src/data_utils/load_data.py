@@ -32,7 +32,7 @@ def loadDataset(config: Dict) -> Dict:
     },
     batched=True)
 
-
+    dataset = dataset.shuffle(123)
     return {
         "dataset": dataset,
         "answer_space": answer_space

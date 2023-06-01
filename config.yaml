@@ -17,14 +17,14 @@ tokenizer:
 
 text_embedding:
   text_encoder: vinai/phobert-base
-  freeze: True
+  freeze: False
   d_features: 768
   d_model: 512
   dropout: 0.1
 
 vision_embedding:
   image_encoder: google/vit-base-patch16-224-in21k
-  freeze: True
+  freeze: False
   d_features: 768
   d_model: 512
   dropout: 0.1
@@ -66,8 +66,8 @@ train:
   save_strategy: epoch
   save_total_limit: 2 
   metric_for_best_model: eval_accuracy
-  per_device_train_batch_size: 256
-  per_device_eval_batch_size: 256
+  per_device_train_batch_size: 64
+  per_device_eval_batch_size: 64
   remove_unused_columns: False
   dataloader_num_workers: 2
   load_best_model_at_end: True
