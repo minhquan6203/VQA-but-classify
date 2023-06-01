@@ -48,7 +48,7 @@ model:
   name: phobert-vit  # Custom name for the multimodal model
   type_model: mcan
   intermediate_dims: 512
-  dropout: 0.3
+  dropout: 0.1
 
 early_stoping:
   early_stopping_patience: 5
@@ -71,7 +71,6 @@ train:
   remove_unused_columns: False
   dataloader_num_workers: 2
   load_best_model_at_end: True
-
 
 metrics:
   metrics_folder: metrics
