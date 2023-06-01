@@ -1,5 +1,5 @@
 from model.mcan_model import createMCAN_Model,MCAN_Model
-from model.vilbert__model import createViLBert_Model,ViLBert_Model
+from model.vilbert_model import createViLBert_Model,ViLBert_Model
 
 def build_model(config, answer_space):
     if config['model']['type_model']=='mcan':
