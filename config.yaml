@@ -18,14 +18,14 @@ tokenizer:
 
 text_embedding:
   text_encoder: vinai/phobert-base
-  freeze: False
+  freeze: True
   d_features: 768
   d_model: 512
   dropout: 0.1
 
 vision_embedding:
   image_encoder: google/vit-base-patch16-224-in21k
-  freeze: False
+  freeze: True
   d_features: 768
   d_model: 512
   dropout: 0.1
@@ -47,7 +47,7 @@ encoder:
 
 model:
   name: phobert-vit  # Custom name for the multimodal model
-  type_model: vilbert
+  type_model: mcan
   intermediate_dims: 512
   dropout: 0.1
 
@@ -61,9 +61,9 @@ train:
   warmup_ratio: 0.0
   warmup_steps: 0
   metric_for_best_model: accuracy
-  per_device_train_batch_size: 32
-  per_device_valid_batch_size: 32
-  per_device_eval_batch_size: 32
+  per_device_train_batch_size: 64
+  per_device_valid_batch_size: 64
+  per_device_eval_batch_size: 64
 
 metrics:
   metrics_folder: metrics
