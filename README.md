@@ -38,7 +38,7 @@ You should first install some necessary packages.
 
 #### Dataset
 
-1. Download the ViVQA dataset, more information about relevant published papers and datasets, please visit [ViVQA]( http://nlp.uit.edu.vn).
+1. Download the ViVQA dataset, more information about relevant published papers and datasets, please visit [UIT-NLP]( http://nlp.uit.edu.vn).
 
 
 And finally, the `datasets` folders will have the following structure:
