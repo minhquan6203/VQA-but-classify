@@ -98,7 +98,7 @@ $ python3 main.py --config config.yaml
 
 ## Pretrained models
 
-We use two pretrained models, namely the ViT(Vision Transfomer) [paper] (https://arxiv.org/abs/2010.11929) and PhoBERT [paper] (https://arxiv.org/abs/2003.00744)
+We use two pretrained models, namely the ViT(Vision Transfomer) [paper](https://arxiv.org/abs/2010.11929) and PhoBERT [paper](https://arxiv.org/abs/2003.00744)
 
 
 
