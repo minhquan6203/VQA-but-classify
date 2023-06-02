@@ -16,7 +16,7 @@ class Predict:
         self.answer_space = create_ans_space(config)
         self.checkpoint_path=os.path.join(config["train"]["output_dir"], "best_model.pth")
         self.test_path=config['inference']['test_dataset']
-        self.bath_size=config['inference']['batch_size']
+        self.batch_size=config['inference']['batch_size']
         self.model = get_model(config)
         self.dataloader = Load_Data(config)
         self.compute_score = WuPalmerScoreCalculator(config)
@@ -34,7 +34,7 @@ class Predict:
 
         # Obtain the prediction from the model
         logging.info("Obtaining predictions...")
-        test_set =self.dataloader(self.test_path,self.bath_size)
+        test_set =self.dataloader.get_dataloader(self.test_path,self.batch_size)
         y_preds=[]
         gts=[]
         self.model.eval()
