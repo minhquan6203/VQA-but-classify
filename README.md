@@ -5,7 +5,7 @@ This repository corresponds to the **PyTorch** implementation of the MCAN for VQ
 
 Orignal MCAN: [link](https://github.com/MILVLG/mcan-vqa)
 
-By using the commonly used bottom-up-attention visual features, a single MCAN model delivers **53.78%**  overall accuracy on the *test* split of *ViVQA* dataset respectively, which significantly outperform existing state-of-the-arts model in Vietnamese. Please check "ViVQA: Vietnamese Visual Question Answering" paper [paper](https://aclanthology.org/2021.paclic-1.72/) for details.
+By using the commonly used bottom-up-attention visual features, a single MCAN model delivers **53.78%**  overall accuracy on the *test* split of *ViVQA* dataset respectively, which significantly outperform existing state-of-the-arts model in Vietnamese. Please check "ViVQA: Vietnamese Visual Question Answering" [paper](https://aclanthology.org/2021.paclic-1.72/) for details.
 
 ![Overview our MCAN reimplement](pic/mcan.png)
 
