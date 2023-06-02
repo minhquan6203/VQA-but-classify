@@ -1,8 +1,8 @@
 # Deep Modular Co-Attention Networks (MCAN)
 
-This repository corresponds to the **PyTorch** implementation of the MCAN for VQA in Vietnamese,
-orignal MCAN: https://github.com/MILVLG/mcan-vqa
-[paper](https://openaccess.thecvf.com/content_CVPR_2019/html/Yu_Deep_Modular_Co-Attention_Networks_for_Visual_Question_Answering_CVPR_2019_paper.html)
+This repository corresponds to the **PyTorch** implementation of the MCAN for VQA in Vietnamese [paper] (https://openaccess.thecvf.com/content_CVPR_2019/html/Yu_Deep_Modular_Co-Attention_Networks_for_Visual_Question_Answering_CVPR_2019_paper.html)
+
+Orignal MCAN github: https://github.com/MILVLG/mcan-vqa
 
 By using the commonly used bottom-up-attention visual features, a single MCAN model delivers **53.78%**  overall accuracy on the *test* split of *ViVQA* dataset respectively, which significantly outperform existing state-of-the-arts model in Vietnamese. Please check "ViVQA: Vietnamese Visual Question Answering" paper [paper](https://aclanthology.org/2021.paclic-1.72/) for details.
 
