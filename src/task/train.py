@@ -1,63 +1,121 @@
-import os
-import shutil
-from typing import Dict
-import transformers
-from transformers import TrainingArguments, Trainer, EarlyStoppingCallback, logging
 import torch
-from transformers.optimization import get_scheduler
+import torch.nn as nn
+import torch.optim as optim
+import os
+import numpy as np
+import random
+from transformers import  AutoModel, AutoTokenizer
 
+from data_utils.load_data import Load_Data
+from utils.builder import build_model
+from eval_metric.evaluate import WuPalmerScoreCalculator
 
-def setTrainingArgs(config: Dict, device) -> TrainingArguments:
-    training_args = config["train"]
-    if device.type == 'cuda':
-        training_args["fp16"] = True
+class STVQA_Task:
+    def __init__(self, config):
+        self.num_epochs = config['train']['num_train_epochs']
+        self.patience = config['train']['patience']
+        self.data_folder=config['data']['dataset_folder']
+        self.train_path = config['data']['train_dataset']
+        self.valid_path=config["data"]["val_dataset"]
+        self.test_path=config["data"]["test_dataset"]
+        self.learning_rate = config['train']['learning_rate']
+        self.train_batch=config['train']['per_device_train_batch_size']
+        self.test_batch=config['train']['per_device_eval_batch_size']
+        self.valid_batch=config['train']['per_device_valid_batch_size']
+        self.save_path = config['train']['output_dir']
+        self.dataloader = Load_Data(config)
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.base_model=build_model(config).to(self.device)
+        self.compute_score = WuPalmerScoreCalculator(config)
+        self.optimizer = optim.Adam(self.base_model.parameters(), lr=self.learning_rate)
 
-    # Add early stopping callback
-    training_args["load_best_model_at_end"] = True
-    # training_args["metric_for_best_model"] = "eval_accuracy"
-    training_args["greater_is_better"] = True
-    early_stopping_patience = config["early_stoping"]["early_stopping_patience"]
-    early_stopping_callback = EarlyStoppingCallback(early_stopping_patience)
+    def training(self):
+        if not os.path.exists(self.save_path):
+          os.makedirs(self.save_path)
+    
+        train = self.dataloader.get_dataloader(self.train_path,self.train_batch)
+        valid = self.dataloader.get_dataloader(self.valid_path,self.valid_batch)
 
-    return TrainingArguments(**training_args), early_stopping_callback
-
-
-def train_model(config, device, dataset, collator, model, compute_metrics):
-    training_args, early_stopping_callback = setTrainingArgs(config, device)
-    training_args.output_dir = os.path.join(training_args.output_dir, config["model"]["name"])
-    optimizer = torch.optim.AdamW(model.parameters(), lr=training_args.learning_rate)
-    scheduler = get_scheduler(
-        training_args.lr_scheduler_type,
-        optimizer,
-        num_warmup_steps=training_args.warmup_steps,
-        num_training_steps=training_args.num_train_epochs * len(dataset['train'])
-    )
-
-    # Load last saved model if exists
-    if os.path.exists(training_args.output_dir):
-        if len(os.listdir(training_args.output_dir)) != 0:
-            checkpoint_folder=max(os.listdir(training_args.output_dir), key=lambda x: int(x.split('-')[1]))
-            model_checkpoint = os.path.join(training_args.output_dir, checkpoint_folder)
-            print(f"continue training at {checkpoint_folder}")
+        
+        if os.path.exists(os.path.join(self.save_path, 'last_model.pth')):
+            checkpoint = torch.load(os.path.join(self.save_path, 'last_model.pth'))
+            self.base_model.load_state_dict(checkpoint['model_state_dict'])
+            self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            print('loaded the last saved model!!!')
+            initial_epoch = checkpoint['epoch'] + 1
+            print(f"continue training from epoch {initial_epoch}")
         else:
-            model_checkpoint=None
-    else:
-        model_checkpoint=None
-        print("frist time training")
+            initial_epoch = 0
+            print("first time training!!!")
+            train_loss = 0.
+            valid_loss = 0.
 
-    optimizers = (optimizer, scheduler)
-    multi_trainer = Trainer(
-        model,
-        training_args,
-        train_dataset=dataset['train'],
-        eval_dataset=dataset['val'],
-        optimizers=optimizers,
-        data_collator=collator,
-        compute_metrics=compute_metrics,
-        callbacks=[early_stopping_callback],
-    )
+        if os.path.exists(os.path.join(self.save_path, 'best_model.pth')):
+            checkpoint = torch.load(os.path.join(self.save_path, 'best_model.pth'))
+            best_valid_f1 = checkpoint['valid_f1']
+        else:
+            best_valid_f1 = 0.
+            
+        threshold=0
+        self.base_model.train()
+        for epoch in range(initial_epoch, self.num_epochs + initial_epoch):
+            valid_acc = 0.
+            valid_wups=0.
+            valid_f1 =0.
+            train_loss = 0.
+            valid_loss = 0.
+            for item in train:
+                self.optimizer.zero_grad()
+                logits, loss = self.base_model(item['question'],item['image_id'],item['answer'])
+                loss.backward()
+                self.optimizer.step()
+                train_loss += loss
+                print(loss)
+            train_loss /=len(train)
+            print(f"epoch {epoch + 1}/{self.num_epochs + initial_epoch}")
+            print(f"train loss: {train_loss:.4f}")
+            
+            with torch.no_grad():
+                for item in valid:
+                    self.optimizer.zero_grad()
+                    logits, loss = self.base_model(item['question'],item['image_id'],item['answer'])
+                    valid_loss += loss
+                    wups,acc,f1 = self.compute_score.compute_metrics(item['answer'],logits)
+                    valid_wups+=wups
+                    valid_acc+=acc
+                    valid_f1+=f1
+            valid_loss /=len(valid)
+            valid_wups /= len(valid)
+            valid_acc /= len(valid)
+            valid_f1 /= len(valid)
+            
+            print(f"valid loss: {valid_loss:.4f} valid wups: {valid_wups:.4f} valid acc: {valid_acc:.4f} valid f1: {valid_f1:.4f}")
 
-    train_multi_metrics = multi_trainer.train(resume_from_checkpoint=model_checkpoint)
-    eval_multi_metrics = multi_trainer.evaluate()
+            # save the last model
+            torch.save({
+                'epoch': epoch,
+                'model_state_dict': self.base_model.state_dict(),
+                'optimizer_state_dict': self.optimizer.state_dict(),
+                'valid_f1': valid_f1}, os.path.join(self.save_path, 'last_model.pth'))
 
-    return train_multi_metrics, eval_multi_metrics
+            # save the best model
+
+            if epoch > 0 and valid_f1 < best_valid_f1:
+              threshold += 1
+            else:
+              threshold = 0
+
+            if valid_f1 > best_valid_f1:
+                best_valid_f1 = valid_f1
+                torch.save({
+                    'epoch': epoch,
+                    'model_state_dict': self.base_model.state_dict(),
+                    'optimizer_state_dict': self.optimizer.state_dict(),
+                    'valid_f1': valid_f1,}, os.path.join(self.save_path, 'best_model.pth'))
+                print(f"saved the best model with validation f1 token level of {valid_f1:.4f}")
+            
+            # early stopping
+            if threshold >= self.patience:
+                print(f"early stopping after epoch {epoch + 1}")
+                break
+

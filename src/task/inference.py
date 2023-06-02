@@ -4,36 +4,37 @@ import yaml
 import logging
 from typing import Text, Dict, List
 import pandas as pd
-from torch.utils.data import DataLoader
+from data_utils.load_data import create_ans_space
 import torch
 import transformers
 from utils.builder import get_model
-from sklearn.metrics import accuracy_score, f1_score
-import json
+from eval_metric.evaluate import WuPalmerScoreCalculator
+from data_utils.load_data import  Load_Data
 class Predict:
-    def __init__(self,config: Dict,answer_space):
+    def __init__(self,config: Dict):
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-        self.answer_space =answer_space
-        self.model_name =config["model"]["name"]
-        self.checkpoint_path=os.path.join(config["train"]["output_dir"], config["model"]["name"])
-        self.checkpoint_model=os.path.join(self.checkpoint_path,min(os.listdir(self.checkpoint_path), key=lambda x: int(x.split('-')[1])),"pytorch_model.bin")
+        self.answer_space = create_ans_space(config)
+        self.checkpoint_path=os.path.join(config["train"]["output_dir"], "best_model.pth")
         self.test_path=config['inference']['test_dataset']
         self.bath_size=config['inference']['batch_size']
-        self.model = get_model(config,len(self.answer_space))
+        self.model = get_model(config)
+        self.dataloader = Load_Data(config)
+        self.compute_score = WuPalmerScoreCalculator(config)
+
     def predict_submission(self):
         transformers.logging.set_verbosity_error()
         logging.basicConfig(level=logging.INFO)
     
 
     # Load the model
-        logging.info("Loading the {0} model...".format(self.model_name))
-        logging.info("best checkpoint at path: {0}".format(self.checkpoint_model))
-        self.model.load_state_dict(torch.load(self.checkpoint_model))
+        logging.info("loadding best model...")
+        checkpoint = torch.load(self.checkpoint_path)
+        self.model.load_state_dict(checkpoint['model_state_dict'])
         self.model.to(self.device)
 
         # Obtain the prediction from the model
         logging.info("Obtaining predictions...")
-        test_set =self.get_dataloader(self.test_path)
+        test_set =self.dataloader(self.test_path,self.bath_size)
         y_preds=[]
         gts=[]
         self.model.eval()
@@ -44,33 +45,12 @@ class Predict:
                 answers = [self.answer_space[i] for i in preds]
                 y_preds.extend(answers)
                 gts.extend(item['answer'])
-        print('accuracy on test:', accuracy_score(gts,y_preds))
-        print('f1 macro on test:', f1_score(gts,y_preds,average='macro'))
-        print('f1 weighted on test:', f1_score(gts,y_preds,average='weighted'))
+        print('accuracy on test:', self.compute_score.accuracy(gts,y_preds))
+        print('f1 char on test:', self.compute_score.F1_char(gts,y_preds))
+        print('f1 token on test:', self.compute_score.F1_token(gts,y_preds))
+        print('wups on test:', self.compute_score.batch_wup_measure(gts,y_preds))
         data = {'preds': y_preds,'gts': gts }
         df = pd.DataFrame(data)
         df.to_csv('./submission.csv', index=False)
 
-    def load_annotations(self,json_file) -> List[Dict]:
-        with open(os.path.join(json_file)) as f:
-            json_data =json.load(f)
-        annotations = []
-        for ann in json_data["annotations"]:
-            question = ann["question"]
-            answer = ann['answers'][0]
-            annotation = {
-                "question": question,
-                "answer": answer,
-                "image_id": ann["image_id"],
-            }
-            annotations.append(annotation)
-        return annotations
 
-    def get_dataloader(self,file_path):
-        dataset=self.load_annotations(file_path)
-        dataloader = DataLoader(
-            dataset,
-            batch_size=self.bath_size,
-            num_workers=2,
-        )
-        return dataloader

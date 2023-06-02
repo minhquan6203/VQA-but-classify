@@ -6,12 +6,13 @@ from text_module.text_embedding import Text_Embedding
 from vision_module.vision_embedding import  Vision_Embedding
 from attention_module.attentions import MultiHeadAtt
 from encoder_module.encoder import CoAttentionEncoder
+from data_utils.load_data import create_ans_space
 
 class ViLBert_Model(nn.Module):
-    def __init__(self,config: Dict, num_labels: int):
+    def __init__(self,config: Dict):
      
         super(ViLBert_Model, self).__init__()
-        self.num_labels = num_labels
+        self.num_labels = len(create_ans_space(config))
         self.intermediate_dims = config["model"]["intermediate_dims"]
         self.dropout=config["model"]["dropout"]
         self.num_attention_heads=config["attention"]['heads']
@@ -44,18 +45,15 @@ class ViLBert_Model(nn.Module):
         fused_output = self.fusion(torch.cat([attended_text, attended_image], dim=1))
         logits = self.classifier(fused_output)
         logits = F.log_softmax(logits, dim=-1)
-        out = {
-            "logits": logits
-        }
+
         if labels is not None:
             # logits=logits.view(-1,self.num_labels)
             # labels = labels.view(-1)
             loss = self.criterion(logits, labels)
-            out["loss"] = loss
         
-        return out
+        return logits,loss
 
 
-def createViLBert_Model(config: Dict, answer_space: List[str]) -> ViLBert_Model:
-    model = ViLBert_Model(config, num_labels=len(answer_space))
+def createViLBert_Model(config: Dict) -> ViLBert_Model:
+    model = ViLBert_Model(config)
     return model

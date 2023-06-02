@@ -1,12 +1,32 @@
 from typing import Dict, Tuple, List
 import numpy as np
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import accuracy_score
 from nltk.corpus import wordnet
+import torch
+#F1 score
+class F1:
+  def Precision(self,y_true,y_pred):
+    common = set(y_true) & set(y_pred)
+    return len(common) / len(set(y_pred))
 
-class ScoreCalculator:
-    def __init__(self, answer_space: List[str]):
-        self.answer_space = answer_space
+  def Recall(self,y_true,y_pred):
+    common = set(y_true) & set(y_pred)
+    return len(common) / len(set(y_true))
 
+  def Compute(self,y_true,y_pred):
+    if len(y_pred) == 0 or len(y_true) == 0:
+        return int(y_pred == y_true)
+
+    precision = self.Precision(y_true, y_pred)
+    recall = self.Recall(y_true, y_pred)
+
+    if precision == 0 or recall == 0:
+        return 0
+    f1 = 2*precision*recall / (precision+recall)
+    return f1
+  
+
+class WuPalmerScoreCalculator:
     def wup_measure(self, a: str, b: str, similarity_threshold: float = 0.925):
         """
         Returns Wu-Palmer similarity score.
@@ -67,16 +87,31 @@ class ScoreCalculator:
         final_score=global_max*weight_a*weight_b*interp_weight*global_weight
         return final_score
     
-    def batch_wup_measure(self, labels: np.ndarray, preds: np.ndarray) -> float:
-        wup_scores = [self.wup_measure(self.answer_space[label], self.answer_space[pred]) for label, pred in zip(labels, preds)]
+    def batch_wup_measure(self, labels: List[str], preds: List[str]) -> float:
+        wup_scores = [self.wup_measure(label, pred) for label, pred in zip(labels, preds)]
         return np.mean(wup_scores)
 
+    def accuracy(self,labels: List[str], preds: List[str]) -> float:
+        return accuracy_score(labels,preds)
+    
+    #F1 score character level
+    def F1_char(self,labels: List[str], preds: List[str]) -> float:
+        f1=F1()
+        scores=[]
+        for i in range(len(labels)):
+            scores.append(f1.Compute(labels[i],preds[i]))
+        return np.mean(scores)
 
-    def compute_metrics(self, eval_tuple: Tuple[np.ndarray, np.ndarray]) -> Dict[str, float]:
-        logits, labels = eval_tuple
+    #F1 score token level
+    def F1_token(self, labels: List[str], preds: List[str]) -> float:
+        f1=F1()
+        scores=[]
+        for i in range(len(labels)):
+            scores.append(f1.Compute(labels[i].split(),preds[i].split()))
+        return np.mean(scores)
+
+    def compute_metrics(self, labels: List[str], logits: torch.Tensor) -> Dict[str, float]:
         preds = logits.argmax(axis=-1)
-        return {
-            "wups": self.batch_wup_measure(labels, preds),
-            "accuracy": accuracy_score(labels, preds),
-            "f1": f1_score(labels, preds, average='macro')
-        }
+        print("labels: ",labels)
+        print("preds: ",preds)
+        return self.batch_wup_measure(labels, preds), self.accuracy(labels, preds), self.F1_token(labels, preds)
