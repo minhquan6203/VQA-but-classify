@@ -88,7 +88,7 @@ The following script will start training with the default hyperparameters in con
 $ python3 main.py --config config.yaml
 ```
 
-##Testing
+## Testing
 
 You must go to main.py file and comment like :"#STVQA_Task(config).training()"
 Then go to config.yaml file and fix the "images_folder" to test images folder like: "images_folder: test"
