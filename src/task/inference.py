@@ -25,7 +25,6 @@ class Predict:
         transformers.logging.set_verbosity_error()
         logging.basicConfig(level=logging.INFO)
     
-
     # Load the model
         logging.info("loadding best model...")
         checkpoint = torch.load(self.checkpoint_path)
