@@ -50,8 +50,9 @@ class ViLBert_Model(nn.Module):
             # logits=logits.view(-1,self.num_labels)
             # labels = labels.view(-1)
             loss = self.criterion(logits, labels)
-        
-        return logits,loss
+            return logits,loss
+        else:
+            return logits
 
 
 def createViLBert_Model(config: Dict) -> ViLBert_Model:

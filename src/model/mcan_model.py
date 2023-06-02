@@ -50,9 +50,9 @@ class MCAN_Model(nn.Module):
             # logits=logits.view(-1,self.num_labels)
             # labels = labels.view(-1)
             loss = self.criterion(logits, labels)
-        
-        return logits,loss
-
+            return logits,loss
+        else
+            return logits
 
 def createMCAN_Model(config: Dict) -> MCAN_Model:
     model = MCAN_Model(config)
