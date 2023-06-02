@@ -40,7 +40,7 @@ class Predict:
         with torch.no_grad():
             for item in test_set:
                 output = self.model(item['question'],item['image_id'].tolist())
-                preds = output["logits"].argmax(axis=-1).cpu().numpy()
+                preds = output.argmax(axis=-1).cpu().numpy()
                 answers = [self.answer_space[i] for i in preds]
                 y_preds.extend(answers)
                 gts.extend(item['answer'])
