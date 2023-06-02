@@ -19,7 +19,7 @@ class Predict:
         self.batch_size=config['inference']['batch_size']
         self.model = get_model(config)
         self.dataloader = Load_Data(config)
-        self.compute_score = WuPalmerScoreCalculator(config)
+        self.compute_score = WuPalmerScoreCalculator()
 
     def predict_submission(self):
         transformers.logging.set_verbosity_error()
