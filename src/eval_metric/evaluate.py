@@ -27,7 +27,7 @@ class F1:
   
 
 class WuPalmerScoreCalculator:
-    def wup_measure(self, a: str, b: str, similarity_threshold: float = 0.925):
+    def wup_measure(self, a: str, b: str, similarity_threshold: float = 0.9):
         """
         Returns Wu-Palmer similarity score.
         More specifically, it computes:
