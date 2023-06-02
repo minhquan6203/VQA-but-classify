@@ -15,7 +15,7 @@ class Predict:
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         self.answer_space = create_ans_space(config)
         self.checkpoint_path=os.path.join(config["train"]["output_dir"], "best_model.pth")
-        self.test_path=config['inference']['test_dataset']
+        self.test_path=config['data']['test_dataset']
         self.batch_size=config['inference']['batch_size']
         self.model = get_model(config)
         self.dataloader = Load_Data(config)

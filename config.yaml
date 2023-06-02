@@ -70,6 +70,4 @@ metrics:
   metrics_file: metrics.json
 
 inference:
-  checkpoint: checkpoint-3
-  test_dataset: data/test.json
   batch_size: 256
