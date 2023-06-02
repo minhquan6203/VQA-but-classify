@@ -21,7 +21,7 @@ class Vision_Embedding(nn.Module):
         self.gelu = nn.GELU()
         self.dropout = nn.Dropout(config["text_embedding"]['dropout'])
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-        self.data_folder = config["data"]["dataset_folder"]
+        self.data_folder = config["data"]["data_folder"]
         self.image_folder = config["data"]["images_folder"]
     def forward(self, images: List[str]):
         processed_images = self.preprocessor(

@@ -109,9 +109,3 @@ class WuPalmerScoreCalculator:
         for i in range(len(labels)):
             scores.append(f1.Compute(labels[i].split(),preds[i].split()))
         return np.mean(scores)
-
-    def compute_metrics(self, labels: List[str], logits: torch.Tensor) -> Dict[str, float]:
-        preds = logits.argmax(axis=-1)
-        print("labels: ",labels)
-        print("preds: ",preds)
-        return self.batch_wup_measure(labels, preds), self.accuracy(labels, preds), self.F1_token(labels, preds)

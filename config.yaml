@@ -2,7 +2,7 @@ base:
   use_cuda: True
 
 data:
-  dataset_folder: data
+  data_folder: data
   images_folder: train
   train_dataset: train.json
   val_dataset: dev.json
