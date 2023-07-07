@@ -2,31 +2,31 @@ from typing import List, Dict, Optional
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from text_module.text_embedding import Text_Embedding
-from vision_module.vision_embedding import  Vision_Embedding
-from attention_module.attentions import MultiHeadAtt
-from encoder_module.encoder import GuidedAttentionEncoder
+from text_module.init_text_embedding import build_text_embbeding
+from vision_module.init_vision_embedding import  build_vision_embedding
+from encoder_module.init_encoder import build_encoder
 from data_utils.load_data import create_ans_space
-#lấy ý tưởng từ MCAN
-class MCAN_Model(nn.Module):
+
+class VQA_Model(nn.Module):
     def __init__(self,config: Dict):
      
-        super(MCAN_Model, self).__init__()
+        super(VQA_Model, self).__init__()
         self.num_labels = len(create_ans_space(config))
         self.intermediate_dims = config["model"]["intermediate_dims"]
         self.dropout=config["model"]["dropout"]
         self.num_attention_heads=config["attention"]['heads']
         self.d_text = config["text_embedding"]['d_features']
         self.d_vision = config["vision_embedding"]['d_features']
-        self.text_embbeding = Text_Embedding(config)
-        self.vision_embbeding = Vision_Embedding(config)
-        self.matt = MultiHeadAtt(config)
+
+        self.text_embbeding = build_text_embbeding(config)
+        self.vision_embbeding = build_vision_embedding(config)
+
         self.fusion = nn.Sequential(
             nn.Linear(self.intermediate_dims +self.intermediate_dims, self.intermediate_dims),
             nn.ReLU(),
             nn.Dropout(self.dropout),
         )
-        self.encoder = GuidedAttentionEncoder(config)
+        self.encoder = build_encoder(config)
         self.classifier = nn.Linear(self.intermediate_dims, self.num_labels)
         self.attention_weights = nn.Linear(self.intermediate_dims, 1)
         self.criterion = nn.CrossEntropyLoss()
@@ -54,6 +54,6 @@ class MCAN_Model(nn.Module):
         else:
             return logits
 
-def createMCAN_Model(config: Dict) -> MCAN_Model:
-    model = MCAN_Model(config)
+def createVQA_Model(config: Dict) -> VQA_Model:
+    model = VQA_Model(config)
     return model

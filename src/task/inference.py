@@ -7,7 +7,7 @@ import pandas as pd
 from data_utils.load_data import create_ans_space
 import torch
 import transformers
-from utils.builder import get_model
+from model.init_model import get_model
 from eval_metric.evaluate import WuPalmerScoreCalculator
 from data_utils.load_data import  Load_Data
 class Predict:

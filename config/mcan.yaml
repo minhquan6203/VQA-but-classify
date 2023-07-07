@@ -17,6 +17,7 @@ tokenizer:
   return_attention_mask: True
 
 text_embedding:
+  type: pretrained #có 3 loại, pretrained, tf_idf, count_vec
   text_encoder: vinai/phobert-base
   freeze: True
   d_features: 768
@@ -31,7 +32,6 @@ vision_embedding:
   dropout: 0.1
 
 attention:
-  layers: 3
   heads: 8
   d_model: 512
   d_key: 64
@@ -42,12 +42,12 @@ attention:
   use_aoa: False
 
 encoder:
+  type: guide # có 3 loại, co (co-attention), cross (cross-attention), guide (guide-attention)
   d_model: 512
   layers: 3
 
 model:
-  name: phobert-vit  # Custom name for the multimodal model
-  type_model: mcan
+  name: mcan_phobert-vit  # Custom name for the multimodal model
   intermediate_dims: 512
   dropout: 0.1
 
@@ -60,7 +60,7 @@ train:
   weight_decay: 0.0
   warmup_ratio: 0.0
   warmup_steps: 0
-  metric_for_best_model: accuracy
+  metric_for_best_model: f1
   per_device_train_batch_size: 64
   per_device_valid_batch_size: 64
   per_device_eval_batch_size: 64

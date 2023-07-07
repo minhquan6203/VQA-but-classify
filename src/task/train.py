@@ -5,7 +5,7 @@ import os
 import numpy as np
 import random
 from data_utils.load_data import Load_Data
-from utils.builder import build_model
+from model.init_model import build_model
 from eval_metric.evaluate import WuPalmerScoreCalculator
 from data_utils.load_data import create_ans_space
 
