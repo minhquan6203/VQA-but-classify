@@ -151,7 +151,6 @@ webencodings==0.5.1
 websocket-client==1.2.3
 widgetsnbextension==3.5.2
 xmltodict==0.12.0
-xxhash==2.0.2
 yarl==1.7.2
 zc.lockfile==2.0
 zipp==3.7.0
