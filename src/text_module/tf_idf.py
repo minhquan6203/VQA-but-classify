@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-
+from mask.masking import generate_padding_mask
 class IDFVectorizer(nn.Module):
     def __init__(self, config, vocab, word_count):
         super(IDFVectorizer, self).__init__()
@@ -36,5 +36,7 @@ class IDFVectorizer(nn.Module):
             tf_vector = self.compute_tf_vector(input_text)
             tf_idf_vectors.append(tf_vector*self.idf_vector)
         tf_idf_vectors = torch.stack(tf_idf_vectors, dim=0)
-        embedding = self.proj(tf_idf_vectors.to(self.proj.weight.device))
-        return embedding.unsqueeze(1)
+        tf_idf_vectors = tf_idf_vectors.to(self.proj.weight.device)  # Chuyển đổi sang cùng device với self.proj
+        features = self.proj(tf_idf_vectors).unsqueeze(1)
+        padding_mask = generate_padding_mask(features, padding_idx=0)
+        return features, padding_mask

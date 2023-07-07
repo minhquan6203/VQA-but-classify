@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+from mask.masking import generate_padding_mask
 
 class CountVectorizer(nn.Module):
     def __init__(self, config, vocab):
@@ -24,5 +25,6 @@ class CountVectorizer(nn.Module):
         
         count_vectors = torch.stack(count_vectors, dim=0)  # Xếp các word_counts thành một tensor
         count_vectors = count_vectors.to(self.proj.weight.device)  # Chuyển đổi sang cùng device với self.proj
-        
-        return self.proj(count_vectors).unsqueeze(1)
+        features = self.proj(count_vectors).unsqueeze(1)
+        padding_mask = generate_padding_mask(features, padding_idx=0)
+        return features, padding_mask

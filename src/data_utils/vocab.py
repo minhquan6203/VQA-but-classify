@@ -6,9 +6,9 @@ def create_vocab(config: Dict):
     dataset = load_dataset(
         "json", 
         data_files={
-            "train": os.path.join(config["data"]["dataset_folder"], config["data"]["train_dataset"]),
-            "val": os.path.join(config["data"]["dataset_folder"], config["data"]["val_dataset"]),
-            "test": os.path.join(config["data"]["dataset_folder"], config["data"]["test_dataset"])
+            "train": os.path.join(config["data"]["data_folder"], config["data"]["train_dataset"]),
+            "val": os.path.join(config["data"]["data_folder"], config["data"]["val_dataset"]),
+            "test": os.path.join(config["data"]["data_folder"], config["data"]["test_dataset"])
         },field='annotations'
     )
 

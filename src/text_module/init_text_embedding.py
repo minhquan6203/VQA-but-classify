@@ -7,7 +7,7 @@ def build_text_embbeding(config):
     vocab,word_count=create_vocab(config)
     if config['text_embedding']['type']=='pretrained':
         return Text_Embedding(config)
-    if config['text_embedding']['type']=='count_vector':
+    if config['text_embedding']['type']=='count_vec':
         return CountVectorizer(config,vocab)
     if config['text_embedding']['type']=='tf_idf':
         return IDFVectorizer(config,vocab,word_count)
