@@ -34,7 +34,7 @@ class VQA_Model(nn.Module):
     def forward(self, questions: List[str], images: List[str], labels: Optional[torch.LongTensor] = None):
         embbed_text, text_mask= self.text_embbeding(questions)
         embbed_vision, vison_mask = self.vision_embbeding(images)
-        encoded_text, encoded_image = self.encoder(embbed_text, text_mask, embbed_vision, vison_mask)
+        encoded_image, encoded_text = self.encoder(embbed_vision, vison_mask,embbed_text, text_mask)
         
         text_attended = self.attention_weights(torch.tanh(encoded_text))
         image_attended = self.attention_weights(torch.tanh(encoded_image))
