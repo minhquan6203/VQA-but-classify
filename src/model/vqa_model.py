@@ -6,6 +6,7 @@ from text_module.init_text_embedding import build_text_embedding
 from vision_module.vision_embedding import  Vision_Encode_Feature,Vision_Embedding,VisionOcrObjEmbedding
 from encoder_module.init_encoder import build_encoder
 from data_utils.load_data import create_ans_space
+from utils.utils import normalize_text
 
 class VQA_Model(nn.Module):
     def __init__(self,config: Dict):
@@ -39,7 +40,7 @@ class VQA_Model(nn.Module):
         pixel_values, ocr_info, obj_info= self.processor(images)
         embedded_vision, vison_mask = self.vision_embedding(pixel_values)
         if ocr_info is not None:
-            ocr_texts = [' '.join(t['texts']) if t['texts'] is not None else '' for t in ocr_info]
+            ocr_texts = [normalize_text(' '.join(t['texts'])) if t['texts'] is not None else '' for t in ocr_info]
             embedded_text, text_mask = self.text_embedding(questions,ocr_texts)
         else:
             embedded_text, text_mask = self.text_embedding(questions)
