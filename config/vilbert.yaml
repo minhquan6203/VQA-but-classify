@@ -31,6 +31,18 @@ vision_embedding:
   d_model: 512
   dropout: 0.1
 
+ocr_obj_embedding:
+  use_ocr_obj: False
+  path_ocr: ocr_feature
+  threshold: 0.3
+  max_scene_text: 32
+  d_model: 512
+  d_det: 256
+  d_rec: 256
+  path_obj: vinvl_vinvl
+  max_bbox: 64
+  d_obj: 2048
+
 attention:
   heads: 8
   d_model: 512

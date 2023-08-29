@@ -26,9 +26,8 @@ class Text_Embedding(nn.Module):
         self.return_token_type_ids = config["tokenizer"]["return_token_type_ids"],
         self.return_attention_mask = config["tokenizer"]["return_attention_mask"],
 
-    def forward(self, questions: List[str]):
-        inputs = self.tokenizer(
-            text = questions,
+    def forward(self, questions: List[str], ocr_text: List[str]=None):
+        inputs = self.tokenizer(questions,ocr_text,
             padding = self.padding,
             max_length = self.max_length,
             truncation = self.truncation,
