@@ -14,6 +14,7 @@ class Vision_Encode_Feature(nn.Module):
         self.data_folder = config["data"]["data_folder"]
         self.image_folder = config["data"]["images_folder"]
         self.use_ocr_obj = config['ocr_obj_embedding']['use_ocr_obj']
+        self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
         self.ocr_features_path = config['ocr_obj_embedding']['path_ocr']
         self.scene_text_threshold = config['ocr_obj_embedding']['threshold']
@@ -24,15 +25,22 @@ class Vision_Encode_Feature(nn.Module):
         self.obj_features_path = config['ocr_obj_embedding']['path_obj']
         self.max_bbox=config["ocr_obj_embedding"]['max_bbox']
         self.d_obj =config['ocr_obj_embedding']['d_obj']
+
     def forward(self, images: List[str]):
-            processed_images = self.preprocessor([self.load_image(image_id) for image_id in images],return_tensors="pt")
-            if self.use_ocr_obj:
-                ocr_info = [self.load_ocr_features(image_id) for image_id in images]
-                obj_info =[self.load_obj_features(image_id) for image_id in images]
-            else:
-                ocr_info = None
-                obj_info = None
-            return processed_images.pixel_values, ocr_info, obj_info
+        processed_images = self.preprocessor(
+            images=[
+                self.load_image(image_id) for image_id in images
+            ],
+            return_tensors="pt",
+        ).to(self.device)
+
+        if self.use_ocr_obj:
+            ocr_info = [self.load_ocr_features(image_id) for image_id in images]
+            obj_info =[self.load_obj_features(image_id) for image_id in images]
+        else:
+            ocr_info = None
+            obj_info = None
+        return processed_images.pixel_values, ocr_info, obj_info
 
     def load_image(self, image_id):
         image_path = os.path.join(self.data_folder, self.image_folder, str(image_id).zfill(11))
@@ -164,9 +172,8 @@ class Vision_Embedding(nn.Module):
         self.proj = nn.Linear(config["vision_embedding"]['d_features'], config["vision_embedding"]['d_model'])
         self.gelu = nn.GELU()
         self.dropout = nn.Dropout(config["vision_embedding"]['dropout'])
-        self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     def forward(self, pixel_values: List[str]):
-        features = (self.backbone(pixel_values).last_hidden_state).to(self.device)
+        features = (self.backbone(pixel_values).last_hidden_state)
         padding_mask = generate_padding_mask(features, padding_idx=0)
         out = self.proj(features)
         out = self.dropout(self.gelu(out))
@@ -177,10 +184,10 @@ class VisionOcrObjEmbedding(nn.Module):
         super().__init__()
 
         self.linear_det_features = nn.Linear(config['ocr_obj_embedding']['d_det'], config['ocr_obj_embedding']['d_model'])
-        self.linear_rec_features = nn.Linear(config.d_rec, config['ocr_obj_embedding']['d_model'])
+        self.linear_rec_features = nn.Linear(config['ocr_obj_embedding']['d_rec'], config['ocr_obj_embedding']['d_model'])
         self.linear_bbox = nn.Linear(4, config['ocr_obj_embedding']['d_model'])
 
-        self.linear_region_features = nn.Linear(config.d_obj,config['ocr_obj_embedding']['d_model'])
+        self.linear_region_features = nn.Linear(config['ocr_obj_embedding']['d_obj'],config['ocr_obj_embedding']['d_model'])
         self.linear_region_boxes = nn.Linear(4,config['ocr_obj_embedding']['d_model'])
         
         self.layer_norm = nn.LayerNorm(config['ocr_obj_embedding']['d_model'])

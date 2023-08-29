@@ -3,7 +3,7 @@ base:
 
 data:
   data_folder: data
-  images_folder: train
+  images_folder: clean_fahasa
   train_dataset: train.json
   val_dataset: dev.json
   test_dataset: test.json
@@ -33,13 +33,13 @@ vision_embedding:
 
 ocr_obj_embedding:
   use_ocr_obj: False
-  path_ocr: ocr_feature
+  path_ocr: data/ocr_feature
   threshold: 0.3
   max_scene_text: 32
   d_model: 512
   d_det: 256
   d_rec: 256
-  path_obj: vinvl_vinvl
+  path_obj: data/obj_feature
   max_bbox: 64
   d_obj: 2048
 

@@ -10,6 +10,7 @@ import transformers
 from model.init_model import get_model
 from eval_metric.evaluate import WuPalmerScoreCalculator
 from data_utils.load_data import  Load_Data
+from tqdm import tqdm
 class Predict:
     def __init__(self,config: Dict):
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -38,7 +39,7 @@ class Predict:
         gts=[]
         self.model.eval()
         with torch.no_grad():
-            for item in test_set:
+            for it, item in enumerate(tqdm(test_set)):
                 output = self.model(item['question'],item['image_id'].tolist())
                 preds = output.argmax(axis=-1).cpu().numpy()
                 answers = [self.answer_space[i] for i in preds]

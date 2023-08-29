@@ -8,6 +8,7 @@ from data_utils.load_data import Load_Data
 from model.init_model import build_model
 from eval_metric.evaluate import WuPalmerScoreCalculator
 from data_utils.load_data import create_ans_space
+from tqdm import tqdm
 
 class STVQA_Task:
     def __init__(self, config):
@@ -65,7 +66,7 @@ class STVQA_Task:
             valid_f1 =0.
             train_loss = 0.
             valid_loss = 0.
-            for item in train:
+            for it, item in enumerate(tqdm(train)):
                 self.optimizer.zero_grad()
                 labels=torch.tensor([self.answer_space.index(answer) for answer in item['answer']]).to(self.device)
                 logits, loss = self.base_model(item['question'],item['image_id'].tolist(),labels)
@@ -77,7 +78,7 @@ class STVQA_Task:
             print(f"train loss: {train_loss:.4f}")
             
             with torch.no_grad():
-                for item in valid:
+                for it, item in enumerate(tqdm(valid)):
                     self.optimizer.zero_grad()
                     labels=torch.tensor([self.answer_space.index(answer) for answer in item['answer']]).to(self.device)
                     logits, loss = self.base_model(item['question'],item['image_id'].tolist(),labels)
