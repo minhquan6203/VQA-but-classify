@@ -7,7 +7,7 @@ import pandas as pd
 from data_utils.load_data import create_ans_space
 import torch
 import transformers
-from model.init_model import get_model
+from model.init_model import build_model
 from eval_metric.evaluate import WuPalmerScoreCalculator
 from data_utils.load_data import  Load_Data
 from tqdm import tqdm
@@ -18,7 +18,7 @@ class Predict:
         self.checkpoint_path=os.path.join(config["train"]["output_dir"], "best_model.pth")
         self.test_path=config['data']['test_dataset']
         self.batch_size=config['inference']['batch_size']
-        self.model = get_model(config)
+        self.model = build_model(config)
         self.dataloader = Load_Data(config)
         self.compute_score = WuPalmerScoreCalculator()
 

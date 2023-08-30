@@ -1,9 +1,7 @@
-from model.vqa_model import createVQA_Model,VQA_Model
+from model.vqa_model import VQA_Model
+from typing import List, Dict, Optional
 
-
-def build_model(config):
-    return createVQA_Model(config)
-
-def get_model(config):
-    return VQA_Model(config)
+def build_model(config: Dict) -> VQA_Model:
+    model = VQA_Model(config)
+    return model
 

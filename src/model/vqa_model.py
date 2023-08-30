@@ -71,7 +71,3 @@ class VQA_Model(nn.Module):
             return logits,loss
         else:
             return logits
-
-def createVQA_Model(config: Dict) -> VQA_Model:
-    model = VQA_Model(config)
-    return model

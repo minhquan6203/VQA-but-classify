@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 from typing import List, Dict, Optional
-from utils.positional_feed_forward import PositionWiseFeedForward
+from utils.positionwise_feed_forward import PositionWiseFeedForward
 from attention_module.attentions import MultiHeadAtt
 from utils.positional_embbeding import SinusoidPositionalEmbedding
 
