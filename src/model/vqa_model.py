@@ -38,17 +38,18 @@ class VQA_Model(nn.Module):
 
     def forward(self, questions: List[str], images: List[str], labels: Optional[torch.LongTensor] = None):
         pixel_values, ocr_info, obj_info= self.processor(images)
-        embedded_vision, vison_mask = self.vision_embedding(pixel_values)
-        if ocr_info is not None:
-            ocr_texts = [normalize_text(' '.join(t['texts'])) if t['texts'] is not None else '' for t in ocr_info]
-            embedded_text, text_mask = self.text_embedding(questions,ocr_texts)
-        else:
-            embedded_text, text_mask = self.text_embedding(questions)
         
         if self.use_ocr_obj:
+            ocr_texts = [normalize_text(' '.join(t['texts'])) if t['texts'] is not None else '' for t in ocr_info]
+            embedded_text, text_mask = self.text_embedding(questions,ocr_texts)
+            embedded_vision, vison_mask = self.vision_embedding(pixel_values)
             embedded_ocr_obj,ocr_obj_mask=self.ocr_obj_embedding(ocr_info, obj_info)
+            
             embedded_vision=torch.cat([embedded_vision,embedded_ocr_obj],dim=1)
             vison_mask=torch.cat([vison_mask,ocr_obj_mask],dim=-1)
+        else:
+            embedded_text, text_mask = self.text_embedding(questions)
+            embedded_vision, vison_mask = self.vision_embedding(pixel_values)
 
         encoded_image, encoded_text = self.encoder(embedded_vision, vison_mask,embedded_text, text_mask)
         text_attended = self.attention_weights(torch.tanh(encoded_text))
