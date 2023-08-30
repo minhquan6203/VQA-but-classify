@@ -37,6 +37,7 @@ ocr_obj_embedding:
   threshold: 0.3
   max_scene_text: 32
   d_model: 512
+  d_grid: 1024
   d_det: 256
   d_rec: 256
   path_obj: data/obj_feature

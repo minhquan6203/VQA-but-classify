@@ -94,17 +94,23 @@ class Vision_Encode_Feature(nn.Module):
                 region_boxes=features['region_boxes'][:self.max_bbox]
             else:
                 region_boxes=self.pad_tensor(features['region_boxes'],self.max_bbox,1.)
+            
             obj_info={
                 'region_features': region_features.detach().cpu(),
-                'region_boxes': region_boxes.detach().cpu()
+                'region_boxes': region_boxes.detach().cpu(),
+                'grid_features': features['grid_features'].detach().cpu(),
+                'grid_boxes': features['grid_boxes'].squeeze(0).detach.cpu(),
             }
         else:
             region_features=self.pad_tensor(torch.ones(1,self.d_obj), self.max_bbox, 1.)
             region_boxes=self.pad_tensor(torch.ones(1,4), self.max_bbox, 1.)
-
+            grid_features=self.pad_tensor(torch.ones(1,4), 49, 1.)
+            grid_boxes=self.pad_tensor(torch.ones(1,4), 49, 1.)
             obj_info={
                 'region_features': region_features.detach().cpu(),
-                'region_boxes': region_boxes.detach().cpu()
+                'region_boxes': region_boxes.detach().cpu(),
+                'grid_features': grid_features.detach().cpu(),
+                'grid_boxes': grid_boxes.detach().cpu(),
             }
 
         return obj_info
@@ -186,6 +192,8 @@ class VisionOcrObjEmbedding(nn.Module):
         self.linear_det_features = nn.Linear(config['ocr_obj_embedding']['d_det'], config['ocr_obj_embedding']['d_model'])
         self.linear_rec_features = nn.Linear(config['ocr_obj_embedding']['d_rec'], config['ocr_obj_embedding']['d_model'])
         self.linear_bbox = nn.Linear(4, config['ocr_obj_embedding']['d_model'])
+        self.linear_grid_features=nn.Linear(config['ocr_obj_embedding']['d_grid'], config['ocr_obj_embedding']['d_model'])
+        self.linear_grid_bbox=nn.Linear(4, config['ocr_obj_embedding']['d_model'])
 
         self.linear_region_features = nn.Linear(config['ocr_obj_embedding']['d_obj'],config['ocr_obj_embedding']['d_model'])
         self.linear_region_boxes = nn.Linear(4,config['ocr_obj_embedding']['d_model'])
@@ -203,14 +211,21 @@ class VisionOcrObjEmbedding(nn.Module):
         region_features=torch.stack([region["region_features"] for region in obj_info]).to(self.device)
         region_boxes=torch.stack([region["region_boxes"] for region in obj_info]).to(self.device)
         
+        grid_features=torch.stack([grid["grid_features"] for grid in obj_info]).to(self.device)
+        grid_boxes=torch.stack([grid["grid_boxes"] for grid in obj_info]).to(self.device)
+        
         det_features=self.linear_det_features(det_features)
         rec_features=self.linear_det_features(rec_features)
         boxes=self.linear_bbox(boxes)
 
         region_features=self.linear_region_features(region_features)
         region_boxes =self.linear_region_boxes(region_boxes)
+        grid_features=self.linear_grid_features(grid_features)
+        grid_boxes=self.linear_grid_bbox(grid_boxes)
 
-        ocr_obj_features = torch.cat([det_features, rec_features, boxes, region_features, region_boxes], dim=1)
+        ocr_features=torch.cat([det_features, rec_features, boxes],dim=-1)
+        obj_features=torch.cat([region_features, region_boxes,grid_features,grid_features],dim=-1)
+        ocr_obj_features = torch.cat([ocr_features,obj_features], dim=-1)
         padding_mask = generate_padding_mask(ocr_obj_features, padding_idx=0)
         out = self.dropout(self.gelu(self.layer_norm(ocr_obj_features)))
         return out, padding_mask
