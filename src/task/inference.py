@@ -43,7 +43,7 @@ class Predict:
 
         # Obtain the prediction from the model
         logging.info("Obtaining predictions...")
-        test_set =self.dataloader.load_test(with_answer=True)
+        test_set =self.dataloader.load_test(with_answer=self.with_answer)
         if self.with_answer:
             y_preds=[]
             gts=[]
