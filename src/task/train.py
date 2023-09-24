@@ -14,14 +14,7 @@ class STVQA_Task:
     def __init__(self, config):
         self.num_epochs = config['train']['num_train_epochs']
         self.patience = config['train']['patience']
-        self.data_folder=config['data']['data_folder']
-        self.train_path = config['data']['train_dataset']
-        self.valid_path=config["data"]["val_dataset"]
-        self.test_path=config["data"]["test_dataset"]
         self.learning_rate = config['train']['learning_rate']
-        self.train_batch=config['train']['per_device_train_batch_size']
-        self.test_batch=config['train']['per_device_eval_batch_size']
-        self.valid_batch=config['train']['per_device_valid_batch_size']
         self.save_path = config['train']['output_dir']
         self.best_metric= config['train']['metric_for_best_model']
         self.answer_space=create_ans_space(config)
@@ -30,14 +23,13 @@ class STVQA_Task:
         self.base_model=build_model(config).to(self.device)
         self.compute_score = WuPalmerScoreCalculator()
         self.optimizer = optim.Adam(self.base_model.parameters(), lr=self.learning_rate)
+        self.scaler = torch.cuda.amp.GradScaler()
 
     def training(self):
         if not os.path.exists(self.save_path):
           os.makedirs(self.save_path)
     
-        train = self.dataloader.get_dataloader(self.train_path,self.train_batch)
-        valid = self.dataloader.get_dataloader(self.valid_path,self.valid_batch)
-
+        train,valid = self.dataloader.load_train_dev()
         
         if os.path.exists(os.path.join(self.save_path, 'last_model.pth')):
             checkpoint = torch.load(os.path.join(self.save_path, 'last_model.pth'))
@@ -65,36 +57,35 @@ class STVQA_Task:
             valid_wups=0.
             valid_f1 =0.
             train_loss = 0.
-            valid_loss = 0.
             for it, item in enumerate(tqdm(train)):
+                with torch.autocast(device_type='cuda', dtype=torch.float16, enabled=True):
+                    labels=torch.tensor([self.answer_space.index(answer) for answer in item['answer']]).to(self.device)
+                    logits, loss = self.base_model(item['question'],item['image_id'].tolist(),labels)
+                self.scaler.scale(loss).backward()
+                self.scaler.step(self.optimizer)
+                self.scaler.update()
                 self.optimizer.zero_grad()
-                labels=torch.tensor([self.answer_space.index(answer) for answer in item['answer']]).to(self.device)
-                logits, loss = self.base_model(item['question'],item['image_id'].tolist(),labels)
-                loss.backward()
-                self.optimizer.step()
                 train_loss += loss
             train_loss /=len(train)
-            print(f"epoch {epoch + 1}/{self.num_epochs + initial_epoch}")
-            print(f"train loss: {train_loss:.4f}")
             
             with torch.no_grad():
                 for it, item in enumerate(tqdm(valid)):
-                    self.optimizer.zero_grad()
-                    labels=torch.tensor([self.answer_space.index(answer) for answer in item['answer']]).to(self.device)
-                    logits, loss = self.base_model(item['question'],item['image_id'].tolist(),labels)
+                    with torch.autocast(device_type='cuda', dtype=torch.float16, enabled=True):
+                        labels=torch.tensor([self.answer_space.index(answer) for answer in item['answer']]).to(self.device)
+                        logits = self.base_model(item['question'],item['image_id'].tolist())
                     preds = logits.argmax(axis=-1).cpu().numpy()
                     answers = [self.answer_space[i] for i in preds]
-                    valid_loss += loss
                     valid_wups+=self.compute_score.batch_wup_measure(item['answer'],answers)
                     valid_acc+=self.compute_score.accuracy(item['answer'],answers)
                     valid_f1+=self.compute_score.F1_token(item['answer'],answers)
                     
-            valid_loss /=len(valid)
             valid_wups /= len(valid)
             valid_acc /= len(valid)
             valid_f1 /= len(valid)
-            
-            print(f"valid loss: {valid_loss:.4f} valid wups: {valid_wups:.4f} valid acc: {valid_acc:.4f} valid f1: {valid_f1:.4f}")
+
+            print(f"epoch {epoch + 1}/{self.num_epochs + initial_epoch}")
+            print(f"train loss: {train_loss:.4f}")
+            print(f"valid wups: {valid_wups:.4f} valid acc: {valid_acc:.4f} valid f1: {valid_f1:.4f}")
 
             if self.best_metric =='accuracy':
                 score=valid_acc

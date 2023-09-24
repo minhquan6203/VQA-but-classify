@@ -6,7 +6,6 @@ from text_module.init_text_embedding import build_text_embedding
 from vision_module.vision_embedding import  Vision_Encode_Feature,Vision_Embedding,VisionOcrObjEmbedding
 from encoder_module.init_encoder import build_encoder
 from data_utils.load_data import create_ans_space
-from utils.utils import normalize_text
 
 class VQA_Model(nn.Module):
     def __init__(self,config: Dict):
@@ -38,12 +37,13 @@ class VQA_Model(nn.Module):
 
     def forward(self, questions: List[str], images: List[str], labels: Optional[torch.LongTensor] = None):
         pixel_values, ocr_info, obj_info= self.processor(images)
-        
         if self.use_ocr_obj:
-            ocr_texts = [normalize_text(' '.join(t['texts'])) if t['texts'] is not None else '' for t in ocr_info]
-            embedded_text, text_mask = self.text_embedding(questions,ocr_texts)
+            ocr_obj_list=[]
+            for ocr,obj in zip(ocr_info,obj_info):
+                ocr_obj_list.append(f"{ocr['texts']} </s> {obj['object_list']}")
+            embedded_text, text_mask = self.text_embedding(questions,ocr_obj_list)
             embedded_vision, vison_mask = self.vision_embedding(pixel_values)
-            embedded_ocr_obj,ocr_obj_mask=self.ocr_obj_embedding(ocr_info, obj_info)
+            embedded_ocr_obj, ocr_obj_mask=self.ocr_obj_embedding(ocr_info, obj_info)
             
             embedded_vision=torch.cat([embedded_vision,embedded_ocr_obj],dim=1)
             vison_mask=torch.cat([vison_mask,ocr_obj_mask],dim=-1)

@@ -2,11 +2,10 @@ base:
   use_cuda: True
 
 data:
-  data_folder: data
-  images_folder: train
-  train_dataset: train.json
-  val_dataset: dev.json
-  test_dataset: test.json
+  images_folder: data/train
+  train_dataset: data/train.json
+  val_dataset: data/dev.json
+  test_dataset: data/test.json
   num_worker: 2
 
 tokenizer:
@@ -33,13 +32,14 @@ vision_embedding:
 
 ocr_obj_embedding:
   use_ocr_obj: False
-  path_ocr: ocr_feature
+  ocr_obj_embedding: False
+  path_ocr: data/ocr_feature
   threshold: 0.3
   max_scene_text: 32
   d_model: 512
   d_det: 256
   d_rec: 256
-  path_obj: vinvl_vinvl
+  path_obj: data/vinvl_vinvl
   max_bbox: 64
   d_obj: 2048
 
@@ -75,11 +75,9 @@ train:
   metric_for_best_model: f1
   per_device_train_batch_size: 64
   per_device_valid_batch_size: 64
-  per_device_eval_batch_size: 64
-
-metrics:
-  metrics_folder: metrics
-  metrics_file: metrics.json
 
 inference:
+  with_answer: True
+  images_folder: data/all_img
+  test_dataset: data/test.json
   batch_size: 256
