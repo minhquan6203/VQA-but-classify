@@ -1,12 +1,9 @@
-base:
-  use_cuda: True
-
 data:
   images_folder: data/all_img
   train_dataset: data/train.json
   val_dataset: data/dev.json
   test_dataset: data/test.json
-  num_worker: 2
+  num_worker: 0
 
 tokenizer:
   padding: max_length
@@ -41,7 +38,7 @@ ocr_obj_embedding:
   d_det: 256
   d_rec: 256
   path_obj: data/obj_feature
-  max_bbox: 64
+  max_bbox: 32
   d_obj: 2048
 
 attention:
@@ -73,12 +70,12 @@ train:
   weight_decay: 0.0
   warmup_ratio: 0.0
   warmup_steps: 0
-  metric_for_best_model: f1
-  per_device_train_batch_size: 64
-  per_device_valid_batch_size: 64
+  metric_for_best_model: accuracy
+  per_device_train_batch_size: 128
+  per_device_valid_batch_size: 128
 
 infer:
   with_answer: True
   images_folder: data/all_img
   test_dataset: data/test.json
-  per_device_eval_batch_size: 64
+  per_device_eval_batch_size: 128

@@ -1,6 +1,3 @@
-base:
-  use_cuda: True
-
 data:
   images_folder: data/train
   train_dataset: data/train.json
