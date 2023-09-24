@@ -20,7 +20,6 @@ class Predict:
         self.checkpoint_path=os.path.join(config["train"]["output_dir"], "best_model.pth")
         self.test_path=config['data']['test_dataset']
         self.with_answer=config['infer']['with_answer']
-        self.batch_size=config['inference']['batch_size']
         self.train_folder=config['data']['images_folder']
         self.test_folder=config['infer']['images_folder']
         self.model = build_model(config)
@@ -44,7 +43,7 @@ class Predict:
 
         # Obtain the prediction from the model
         logging.info("Obtaining predictions...")
-        test_set =self.dataloader.load_test()
+        test_set =self.dataloader.load_test(with_answer=True)
         if self.with_answer:
             y_preds=[]
             gts=[]
