@@ -17,7 +17,7 @@ class VQA_dataset(Dataset):
         if with_answer:
             for ann in json_data["annotations"]:
                 question = preprocess_sentence(ann["question"])
-                answer = preprocess_sentence(ann['answers'][0])
+                answer = preprocess_sentence(str(ann['answers'][0]))
                 #answer = preprocess_sentence(ann['answer'])
                 annotation = {
                     "id": ann['id'],
@@ -29,7 +29,7 @@ class VQA_dataset(Dataset):
         else:
             for ann in json_data["annotations"]:
                 question = preprocess_sentence(ann["question"])
-                answer = preprocess_sentence(ann['answers'][0])
+                answer = preprocess_sentence(str(ann['answers'][0]))
                 #answer = preprocess_sentence(ann['answer'])
                 annotation = {
                     "id": ann['id'],
@@ -85,7 +85,7 @@ def create_ans_space(config: Dict):
 
     for data_file in dataset.values():
         for ans in data_file['answers']:
-            answer_space.append(ans[0])
+            answer_space.append(str(ans[0]))
     answer_space = sorted(list(set(answer_space)))
 
     return answer_space

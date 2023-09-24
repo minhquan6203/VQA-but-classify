@@ -221,14 +221,14 @@ class VisionOcrObjEmbedding(nn.Module):
     def __init__(self, config):
         super().__init__()
 
-        self.linear_det_features = nn.Linear(config.d_det, config.d_model)
-        self.linear_rec_features = nn.Linear(config.d_rec, config.d_model)
-        self.linear_bbox = nn.Linear(4, config.d_model)
+        self.linear_det_features = nn.Linear(config["ocr_obj_embedding"]["d_det"], config["ocr_obj_embedding"]["d_model"])
+        self.linear_rec_features = nn.Linear(config["ocr_obj_embedding"]["d_rec"], config["ocr_obj_embedding"]["d_model"])
+        self.linear_bbox = nn.Linear(4, config["ocr_obj_embedding"]["d_model"])
 
-        self.linear_region_features = nn.Linear(config.d_obj,config.d_model)
-        self.linear_region_boxes = nn.Linear(4,config.d_model)       
+        self.linear_region_features = nn.Linear(config["ocr_obj_embedding"]["d_obj"],config["ocr_obj_embedding"]["d_model"])
+        self.linear_region_boxes = nn.Linear(4,config["ocr_obj_embedding"]["d_model"])       
         
-        self.layer_norm = nn.LayerNorm(config.d_model)
+        self.layer_norm = nn.LayerNorm(config["ocr_obj_embedding"]["d_model"])
         self.gelu = nn.GELU()
         self.dropout = nn.Dropout(0.1)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

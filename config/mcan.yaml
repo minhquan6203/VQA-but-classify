@@ -2,7 +2,7 @@ base:
   use_cuda: True
 
 data:
-  images_folder: data/clean_fahasa
+  images_folder: data/all_img
   train_dataset: data/train.json
   val_dataset: data/dev.json
   test_dataset: data/test.json
@@ -10,7 +10,7 @@ data:
 
 tokenizer:
   padding: max_length
-  max_length: 20
+  max_length: 100
   truncation: True
   return_token_type_ids: True
   return_attention_mask: True
@@ -31,8 +31,8 @@ vision_embedding:
   dropout: 0.1
 
 ocr_obj_embedding:
-  use_ocr_obj: False
-  ocr_obj_embedding: False
+  use_ocr_obj: True
+  use_attr: False
   path_ocr: data/ocr_feature
   threshold: 0.3
   max_scene_text: 32
@@ -77,8 +77,8 @@ train:
   per_device_train_batch_size: 64
   per_device_valid_batch_size: 64
 
-inference:
+infer:
   with_answer: True
   images_folder: data/all_img
   test_dataset: data/test.json
-  batch_size: 256
+  per_device_eval_batch_size: 64
