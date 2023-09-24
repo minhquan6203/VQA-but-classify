@@ -39,7 +39,7 @@ ocr_obj_embedding:
   d_model: 512
   d_det: 256
   d_rec: 256
-  path_obj: data/vinvl_vinvl
+  path_obj: data/obj_feature
   max_bbox: 64
   d_obj: 2048
 
