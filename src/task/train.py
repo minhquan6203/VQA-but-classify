@@ -71,7 +71,6 @@ class STVQA_Task:
             with torch.no_grad():
                 for it, item in enumerate(tqdm(valid)):
                     with torch.autocast(device_type='cuda', dtype=torch.float16, enabled=True):
-                        labels=torch.tensor([self.answer_space.index(answer) for answer in item['answer']]).to(self.device)
                         logits = self.base_model(item['question'],item['image_id'].tolist())
                     preds = logits.argmax(axis=-1).cpu().numpy()
                     answers = [self.answer_space[i] for i in preds]
