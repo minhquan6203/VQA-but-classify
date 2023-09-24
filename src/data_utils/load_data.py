@@ -85,7 +85,7 @@ def create_ans_space(config: Dict):
 
     for data_file in dataset.values():
         for ans in data_file['answers']:
-            answer_space.append(str(ans[0]))
+            answer_space.append(preprocess_sentence(str(ans[0])))
     answer_space = sorted(list(set(answer_space)))
 
     return answer_space
